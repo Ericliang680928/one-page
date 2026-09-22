@@ -1,1 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8" />
+<title>開喜商行 × 九田園農莊｜苗栗大湖水梨</title>
+<link rel="stylesheet" href="_ds/modernist-6ada81c3-14bf-4dde-ad33-df4f0a9aade1/styles.css" />
+<script src="_ds/modernist-6ada81c3-14bf-4dde-ad33-df4f0a9aade1/_ds_bundle.js"></script>
+<link rel="stylesheet" href="theme-sunny.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" />
+<style>
+  body { margin: 0; text-wrap: pretty; font-family: "Archivo", "Noto Sans TC", system-ui, sans-serif; }
+  h1, h2, h3, h4, h5, h6 { font-family: "Archivo", "Noto Sans TC", system-ui, sans-serif; }
+  html { scroll-behavior: smooth; }
+  a { color: var(--color-accent-700); }
+  a:hover { color: var(--color-accent); }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</helmet>
 
+<div style="background: var(--color-bg); color: var(--color-text); min-height: 100vh">
+
+  <header style="position: sticky; top: 0; z-index: 20; background: var(--color-bg); border-bottom: 2px solid var(--color-divider); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) clamp(20px, 5vw, 72px)">
+    <div style="display: flex; align-items: baseline; gap: var(--space-3); min-width: 0">
+      <span style="font-weight: 800; font-size: 19px; letter-spacing: 0.02em; white-space: nowrap">開喜商行</span>
+      <span style="font-size: 12px; letter-spacing: 0.12em; color: var(--color-neutral-700); white-space: nowrap">九田園農莊</span>
+    </div>
+    <nav style="display: flex; align-items: center; gap: clamp(10px, 2vw, 26px); flex-wrap: wrap; justify-content: flex-end">
+      <a href="#varieties" style="font-size: 13px; text-decoration: none; color: var(--color-text); white-space: nowrap">品種</a>
+      <a href="#calendar" style="font-size: 13px; text-decoration: none; color: var(--color-text); white-space: nowrap">產季</a>
+      <a href="#gifts" style="font-size: 13px; text-decoration: none; color: var(--color-text); white-space: nowrap">禮盒</a>
+      <a href="#grow" style="font-size: 13px; text-decoration: none; color: var(--color-text); white-space: nowrap">栽培</a>
+      <a href="#story" style="font-size: 13px; text-decoration: none; color: var(--color-text); white-space: nowrap">果園</a>
+      <a href="#contact" class="btn btn-primary" style="text-decoration: none">訂購洽詢</a>
+    </nav>
+  </header>
+
+  <section data-screen-label="首頁形象" style="padding: clamp(40px, 7vw, 96px) clamp(20px, 5vw, 72px) 0">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-4)">
+        <span class="tag tag-accent">苗栗大湖</span>
+        <span class="tag tag-accent-2">產地自種自銷</span>
+        <span class="tag tag-accent-2">當日採收出貨</span>
+      </div>
+      <h1 style="font-size: clamp(40px, 6.4vw, 86px); line-height: 1.08; letter-spacing: -0.01em; margin: 0">
+        <span style="display: block">高接梨，</span>
+        <span style="display: block">從這棵樹到你家。</span>
+      </h1>
+      <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); margin-top: clamp(24px, 4vw, 44px)">
+        <p style="font-size: 17px; line-height: 1.7; max-width: 54ch; margin: 0">開喜商行是九田園農莊的出貨門面。果園在苗栗縣大湖鄉，套袋、疏果、測糖、分級、裝箱都在同一座園子裡做完，當日採收、當日出貨。</p>
+        <div style="display: flex; gap: var(--space-3); flex-wrap: wrap">
+          <a href="#contact" class="btn btn-primary" style="text-decoration: none">LINE 訂購</a>
+          <a href="#contact" class="btn btn-secondary" style="text-decoration: none">電話訂購</a>
+          <a href="#calendar" class="btn btn-ghost" style="text-decoration: none">看今年產季</a>
+        </div>
+      </div>
+      <figure class="grayscale" style="margin-top: clamp(28px, 5vw, 56px)">
+        <img src="assets/hero-orchard.jpg" alt="九田園農莊果園裡結實的高接梨" style="width: 100%; height: clamp(260px, 48vw, 560px); object-fit: cover" />
+      </figure>
+    </div>
+  </section>
+
+  <section style="padding: clamp(32px, 5vw, 64px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-8) var(--space-6)">
+      <div>
+        <p style="font-size: clamp(30px, 3.4vw, 46px); font-weight: 800; line-height: 1.1; color: var(--color-accent-600); margin: 0">6–11月</p>
+        <p style="font-size: 13px; letter-spacing: 0.1em; color: var(--color-neutral-800); margin: var(--space-3) 0 0">水梨產季</p>
+      </div>
+      <div>
+        <p style="font-size: clamp(30px, 3.4vw, 46px); font-weight: 800; line-height: 1.1; color: var(--color-accent-600); margin: 0">5 種</p>
+        <p style="font-size: 13px; letter-spacing: 0.1em; color: var(--color-neutral-800); margin: var(--space-3) 0 0">水梨品種</p>
+      </div>
+      <div>
+        <p style="font-size: clamp(30px, 3.4vw, 46px); font-weight: 800; line-height: 1.1; color: var(--color-accent-600); margin: 0">雙層</p>
+        <p style="font-size: 13px; letter-spacing: 0.1em; color: var(--color-neutral-800); margin: var(--space-3) 0 0">黃金袋牛皮套袋</p>
+      </div>
+      <div>
+        <p style="font-size: clamp(30px, 3.4vw, 46px); font-weight: 800; line-height: 1.1; color: var(--color-accent-600); margin: 0">逐批</p>
+        <p style="font-size: 13px; letter-spacing: 0.1em; color: var(--color-neutral-800); margin: var(--space-3) 0 0">糖度計測甜度</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="varieties" data-screen-label="水梨品種" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">01 — 品種</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-8)">園子裡種的梨</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: clamp(20px, 3vw, 40px)">
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/pear-fat.jpg" alt="寶島甘露梨" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">寶島甘露梨</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">果粒大、肉質細，蜜味明顯，是禮盒的主力品項。</p>
+          <span class="tag tag-accent">7–8月</span>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/pear-pair-sun.jpg" alt="日本青龍梨" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">日本青龍梨</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">皮薄、口感清脆，汁水足，吃起來俐落。</p>
+          <span class="tag tag-accent">7–8月</span>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/pear-pair-close.jpg" alt="豐水梨" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">豐水梨</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">甜度高、汁多，產季最早，開季的第一批梨。</p>
+          <span class="tag tag-accent">6–7月</span>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/tree-bags.jpg" alt="新興梨" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">新興梨</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">口感脆實、耐放，適合一次多買、慢慢吃。</p>
+          <span class="tag tag-accent">9–10月</span>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/harvest-hands.jpg" alt="秋水梨" style="width: 100%; aspect-ratio: 4 / 3; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">秋水梨</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">產季尾聲的梨，風味濃，熟度掌握得剛好才採。</p>
+          <span class="tag tag-accent">10–11月</span>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4); background: var(--color-surface); aspect-ratio: 4 / 3; display: grid; place-items: start; padding: var(--space-6)">
+            <p style="font-size: 15px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">大湖的其他季節<br />也有東西可以出</p>
+          </figure>
+          <h3 style="font-size: 21px; margin: 0 0 var(--space-2)">季節農產</h3>
+          <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">甜柿、椪柑、桶柑、草莓。數量依當年收成，開賣前公告。</p>
+          <span class="tag tag-neutral">10–4月</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="calendar" data-screen-label="產季月曆" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">02 — 產季</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-4)">一年的出貨月曆</h2>
+      <p style="font-size: 14px; color: var(--color-neutral-800); max-width: 52ch; margin: 0 0 var(--space-8)">實際採收依當年氣候前後調整，開賣前會先通知。</p>
+
+      <div style="overflow-x: auto">
+        <table class="table" style="min-width: 560px; width: 100%">
+          <thead>
+            <tr>
+              <th style="text-align: left">月份</th>
+              <th style="text-align: left">品項</th>
+              <th style="text-align: left">狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ months }}" as="row" hint-placeholder-count="6">
+              <tr>
+                <td style="font-weight: 700; white-space: nowrap">{{ row.month }}</td>
+                <td>{{ row.items }}</td>
+                <td style="color: var(--color-neutral-800)">{{ row.note }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="gifts" data-screen-label="禮盒與價格" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">03 — 禮盒</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-8)">送禮的規格</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: clamp(20px, 3vw, 40px)">
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/giftbox-classic.jpg" alt="經典禮盒，寶島甘露梨與日本青龍梨" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 22px; margin: 0 0 var(--space-2)">經典禮盒</h3>
+          <p style="font-size: 15px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">6 顆裝，可選寶島甘露梨或日本青龍梨，逐顆套網、提把紙盒。</p>
+          <p style="font-size: 14px; font-weight: 700; margin: 0">{{ priceLabel }}</p>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure style="margin: 0 0 var(--space-4)">
+            <img src="assets/giftbox-2.jpg" alt="寶島甘露梨禮盒 2 顆裝" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 22px; margin: 0 0 var(--space-2)">寶島甘露梨禮盒</h3>
+          <p style="font-size: 15px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">2 顆裝經典款，探病、伴手、小份量送禮都合適。</p>
+          <p style="font-size: 14px; font-weight: 700; margin: 0">{{ priceLabel }}</p>
+        </article>
+
+        <article style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <figure class="grayscale" style="margin: 0 0 var(--space-4)">
+            <img src="assets/pear-pair-close.jpg" alt="自家吃的家庭號箱裝" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+          </figure>
+          <h3 style="font-size: 22px; margin: 0 0 var(--space-2)">家庭號箱裝</h3>
+          <p style="font-size: 15px; line-height: 1.7; color: var(--color-neutral-800); margin: 0 0 var(--space-3)">自家吃的規格，不走禮盒包裝，同一批梨、同一套分級。</p>
+          <p style="font-size: 14px; font-weight: 700; margin: 0">{{ priceLabel }}</p>
+        </article>
+      </div>
+
+      <p style="font-size: 13px; color: var(--color-neutral-700); margin: var(--space-8) 0 0">＊禮盒規格與價格待商行確認後補上。</p>
+    </div>
+  </section>
+
+  <section id="grow" data-screen-label="栽培過程" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">04 — 栽培</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-8)">一顆梨經過的手</h2>
+
+      <div style="display: grid; gap: 0">
+        <div style="display: grid; grid-template-columns: minmax(0, 60px) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-4) clamp(20px, 4vw, 56px); align-items: start; padding: clamp(20px, 3vw, 36px) 0; border-top: 2px solid var(--color-divider)">
+          <p style="font-weight: 800; font-size: 15px; margin: 0">01</p>
+          <div>
+            <h3 style="font-size: 20px; margin: 0 0 var(--space-2)">疏果與剪枝</h3>
+            <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0">一枝上留幾顆，留下來的才有空間長大。全程人工。</p>
+          </div>
+          <figure class="grayscale" style="margin: 0">
+            <img src="assets/family-work.jpg" alt="果園中疏果與剪枝" style="width: 100%; aspect-ratio: 16 / 10; object-fit: cover" />
+          </figure>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 60px) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-4) clamp(20px, 4vw, 56px); align-items: start; padding: clamp(20px, 3vw, 36px) 0; border-top: 2px solid var(--color-divider)">
+          <p style="font-weight: 800; font-size: 15px; margin: 0">02</p>
+          <div>
+            <h3 style="font-size: 20px; margin: 0 0 var(--space-2)">黃金袋雙層套袋</h3>
+            <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0">牛皮＋牛皮、一尺二加大袋，一顆一袋手工包起來，果皮才乾淨細緻。</p>
+          </div>
+          <figure class="grayscale" style="margin: 0">
+            <img src="assets/tree-bags.jpg" alt="樹上掛著黃金袋，牛皮加牛皮一尺二加大" style="width: 100%; aspect-ratio: 16 / 10; object-fit: cover" />
+          </figure>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 60px) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-4) clamp(20px, 4vw, 56px); align-items: start; padding: clamp(20px, 3vw, 36px) 0; border-top: 2px solid var(--color-divider)">
+          <p style="font-weight: 800; font-size: 15px; margin: 0">03</p>
+          <div>
+            <h3 style="font-size: 20px; margin: 0 0 var(--space-2)">測糖度才採</h3>
+            <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0">以糖度計逐批量測，甜度到了才剪下來。</p>
+          </div>
+          <figure class="grayscale" style="margin: 0">
+            <img src="assets/brix.jpg" alt="糖度計上的 Brix 讀數" style="width: 100%; aspect-ratio: 16 / 10; object-fit: cover" />
+          </figure>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 60px) minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-4) clamp(20px, 4vw, 56px); align-items: start; padding: clamp(20px, 3vw, 36px) 0; border-top: 2px solid var(--color-divider); border-bottom: 2px solid var(--color-divider)">
+          <p style="font-weight: 800; font-size: 15px; margin: 0">04</p>
+          <div>
+            <h3 style="font-size: 20px; margin: 0 0 var(--space-2)">當日採收、當日出貨</h3>
+            <p style="font-size: 14px; line-height: 1.7; color: var(--color-neutral-800); margin: 0">分級、套網、裝箱在園裡完成，不進冷藏庫轉手。</p>
+          </div>
+          <figure class="grayscale" style="margin: 0">
+            <img src="assets/harvest-hands.jpg" alt="果農採收水梨" style="width: 100%; aspect-ratio: 16 / 10; object-fit: cover" />
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="story" data-screen-label="果園故事" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">05 — 果園</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-6)">顧這片園子的人</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: clamp(24px, 4vw, 56px); align-items: start">
+        <div>
+          <p style="font-size: 17px; line-height: 1.8; margin: 0 0 var(--space-4)">園子裡每棵樹都掛了一塊木牌，蓋著開喜商行的圓印，寫上「福到」、「福多」。梨採下來之前，會先送到徐媽媽手上。</p>
+          <p style="font-size: 15px; line-height: 1.8; color: var(--color-neutral-800); margin: 0 0 var(--space-4)">她是農莊的「超級試吃員」，一甲子的資歷。徐爸爸、園裡的工班、還有從小吃梨長大的黑豆，各有一頂皇冠。</p>
+          <p style="font-size: 15px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">出貨之外也接產地參訪，園裡自己採、自己包，順便吃一顆。</p>
+        </div>
+        <figure class="grayscale" style="margin: 0">
+          <img src="assets/taster-mom.jpg" alt="超級試吃員徐媽媽，一甲子的資歷" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: top" />
+        </figure>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-4); margin-top: clamp(28px, 4vw, 48px)">
+        <figure class="grayscale" style="margin: 0">
+          <img src="assets/tag-fudao.jpg" alt="掛在梨樹上的開喜商行木牌，寫著福到" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover" />
+          <figcaption>每棵樹一塊木牌：福到、福多</figcaption>
+        </figure>
+        <figure class="grayscale" style="margin: 0">
+          <img src="assets/tasters-collage.jpg" alt="園裡的超級試吃員們" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover" />
+          <figcaption>超級試吃員，全員到齊</figcaption>
+        </figure>
+        <figure class="grayscale" style="margin: 0">
+          <img src="assets/dog-heidou.jpg" alt="農莊的狗黑豆，從小吃梨到大" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover" />
+          <figcaption>黑豆，從小吃到大</figcaption>
+        </figure>
+        <figure class="grayscale" style="margin: 0">
+          <img src="assets/group-visit.jpg" alt="產地參訪的來客在果園小徑合照" style="width: 100%; aspect-ratio: 3 / 4; object-fit: cover" />
+          <figcaption>產地參訪，自己採自己包</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="photos" data-screen-label="照片集" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">06 — 照片</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-8)">園子的樣子</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-4)">
+        <img src="assets/farmer-branch.jpg" alt="果農在樹下扶著結果的枝條" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/pear-pair-sun.jpg" alt="逆光下的兩顆水梨" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/tree-bags.jpg" alt="整棵樹掛滿黃金袋" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/family-work.jpg" alt="一家人在園裡工作" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/pear-fat.jpg" alt="枝上的胖胖梨" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/harvest-hands.jpg" alt="採收時剪下套袋的梨" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/hero-orchard.jpg" alt="棚架下成串的水梨" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+        <img src="assets/tag-fudao.jpg" alt="手拿福到木牌" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover" />
+      </div>
+    </div>
+  </section>
+
+  <section id="shipping" data-screen-label="宅配與付款" style="border-top: 2px solid var(--color-divider); padding: clamp(40px, 6vw, 88px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <span style="display: block; font-size: 13px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: var(--space-3)">07 — 宅配</span>
+      <h2 style="font-size: clamp(28px, 3.6vw, 44px); margin: 0 0 var(--space-8)">怎麼訂、怎麼寄</h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: clamp(20px, 3vw, 40px)">
+        <div style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <h3 style="font-size: 19px; margin: 0 0 var(--space-3)">訂購方式</h3>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">以 LINE 或電話下單。告知品項、規格、數量、收件資訊與希望到貨日，我們回覆可出貨的日期。</p>
+        </div>
+        <div style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <h3 style="font-size: 19px; margin: 0 0 var(--space-3)">出貨與運費</h3>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">產季期間採收後隔日出貨，宅配約 1–2 日到貨。宅配方式與運費待商行確認後補上。</p>
+        </div>
+        <div style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <h3 style="font-size: 19px; margin: 0 0 var(--space-3)">付款</h3>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">付款方式（匯款、貨到付款等）待商行確認後補上。</p>
+        </div>
+        <div style="border-top: 2px solid var(--color-divider); padding-top: var(--space-4)">
+          <h3 style="font-size: 19px; margin: 0 0 var(--space-3)">收到後</h3>
+          <p style="font-size: 14px; line-height: 1.8; color: var(--color-neutral-800); margin: 0">拆箱請先檢查果況，若有碰傷請拍照告知，當批處理。梨建議冷藏保存，趁脆吃。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" data-screen-label="聯絡與地圖" style="background: var(--color-accent-2-600); color: var(--color-bg); padding: clamp(48px, 7vw, 104px) clamp(20px, 5vw, 72px)">
+    <div style="max-width: 1200px; margin: 0 auto">
+      <h2 style="font-size: clamp(32px, 5vw, 64px); line-height: 1.1; margin: 0 0 clamp(28px, 4vw, 48px); color: var(--color-bg)">
+        <span style="display: block">要梨的時候，</span>
+        <span style="display: block">直接跟我們說。</span>
+      </h2>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(24px, 4vw, 48px)">
+        <div style="border-top: 2px solid var(--color-bg); padding-top: var(--space-4)">
+          <p style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; margin: 0 0 var(--space-2)">電話</p>
+          <p style="font-size: 20px; font-weight: 800; margin: 0">待補</p>
+        </div>
+        <div style="border-top: 2px solid var(--color-bg); padding-top: var(--space-4)">
+          <p style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; margin: 0 0 var(--space-2)">LINE</p>
+          <p style="font-size: 20px; font-weight: 800; margin: 0">待補</p>
+        </div>
+        <div style="border-top: 2px solid var(--color-bg); padding-top: var(--space-4)">
+          <p style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; margin: 0 0 var(--space-2)">果園位置</p>
+          <p style="font-size: 20px; font-weight: 800; margin: 0 0 var(--space-2)">苗栗縣大湖鄉</p>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=%E4%B9%9D%E7%94%B0%E5%9C%92%E8%BE%B2%E8%8E%8A+%E8%8B%97%E6%A0%97%E7%B8%A3%E5%A4%A7%E6%B9%96%E9%84%89" target="_blank" rel="noopener" style="font-size: 14px; color: var(--color-bg); text-decoration: underline">在 Google 地圖開啟</a>
+        </div>
+        <div style="border-top: 2px solid var(--color-bg); padding-top: var(--space-4)">
+          <p style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; margin: 0 0 var(--space-2)">營業時間</p>
+          <p style="font-size: 20px; font-weight: 800; margin: 0">待補</p>
+        </div>
+      </div>
+
+      <p style="font-size: 15px; font-weight: 600; margin: clamp(28px, 4vw, 48px) 0 0">＊電話、LINE、詳細地址與營業時間請提供給我們，會直接填進這一區。</p>
+    </div>
+  </section>
+
+  <footer style="padding: var(--space-8) clamp(20px, 5vw, 72px); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); justify-content: space-between; align-items: baseline">
+    <p style="font-size: 13px; margin: 0">開喜商行 ｜ 九田園農莊 ｜ 苗栗大湖</p>
+    <p style="font-size: 13px; color: var(--color-neutral-700); margin: 0">照片為果園實拍</p>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;showPrices&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;內容&quot; },
+  &quot;highlightMonth&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;無&quot;, &quot;6–7月&quot;, &quot;7–8月&quot;, &quot;9–10月&quot;, &quot;10–11月&quot;, &quot;12–1月&quot;, &quot;12–4月&quot;], &quot;default&quot;: &quot;無&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;內容&quot; }
+}">
+class Component extends DCLogic {
+  renderVals() {
+    const showPrices = this.props.showPrices ?? false;
+    const rows = [
+      { month: "6–7月", items: "豐水梨", note: "開季第一批" },
+      { month: "7–8月", items: "寶島甘露梨、日本青龍梨", note: "禮盒主力" },
+      { month: "9–10月", items: "新興梨", note: "耐放，適合多買" },
+      { month: "10–11月", items: "秋水梨、甜柿", note: "產季尾聲" },
+      { month: "12–1月", items: "椪柑、桶柑", note: "數量依收成" },
+      { month: "12–4月", items: "草莓", note: "大湖季節品項" },
+    ];
+    const hi = this.props.highlightMonth ?? "無";
+    return {
+      priceLabel: showPrices ? "價格請見規格表" : "價格請來電或 LINE 洽詢",
+      months: rows.map((r) => ({
+        ...r,
+        note: r.month === hi ? r.note + "（目前出貨中）" : r.note,
+      })),
+    };
+  }
+}
+</script>
+</body>
+</html>

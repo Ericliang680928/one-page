@@ -1,0 +1,52 @@
+/* 開喜商行 — token retune of the Modernist sheet (per readme: change the look by editing the tokens).
+   Sunlit orchard palette: cream ground, leaf-ink text, pear-gold accent, leaf-green second role. Photos print in colour. */
+:root {
+  --color-bg: #fefbe9;
+  --color-surface: #fbf0c7;
+  --color-text: #16250f;
+  --color-accent: #ff8c1a;
+  --color-accent-2: #3fa129;
+  --color-divider: color-mix(in srgb, #16250f 45%, transparent);
+
+  --color-neutral-100: #faf7ee;
+  --color-neutral-200: #ece8da;
+  --color-neutral-300: #d8d4c4;
+  --color-neutral-400: #bbb7a6;
+  --color-neutral-500: #9b9887;
+  --color-neutral-600: #7c7a6a;
+  --color-neutral-700: #5f5e50;
+  --color-neutral-800: #434337;
+  --color-neutral-900: #2c2d24;
+
+  --color-accent-100: #fff2dc;
+  --color-accent-200: #ffdca3;
+  --color-accent-300: #ffc06a;
+  --color-accent-400: #ffa03d;
+  --color-accent-500: #ff8c1a;
+  --color-accent-600: #e06d00;
+  --color-accent-700: #b34f00;
+  --color-accent-800: #7d3600;
+  --color-accent-900: #4a1f00;
+
+  --color-accent-2-100: #eafce0;
+  --color-accent-2-200: #c9f5ac;
+  --color-accent-2-300: #9fe777;
+  --color-accent-2-400: #6bc945;
+  --color-accent-2-500: #3fa129;
+  --color-accent-2-600: #2f8a1c;
+  --color-accent-2-700: #206d12;
+  --color-accent-2-800: #164e0c;
+  --color-accent-2-900: #0c3006;
+
+  --color-sun: #ffd23f;
+  --color-sky: #35a7d6;
+
+  --font-heading: "Archivo", "Noto Sans TC", system-ui, sans-serif;
+  --font-body: "Archivo", "Noto Sans TC", system-ui, sans-serif;
+}
+.grayscale { filter: none; }
+.btn-primary { color: var(--color-text); }
+.btn-primary:hover { background: var(--color-accent-400); }
+.btn-primary:active { background: var(--color-accent-600); }
+.tag-accent { background: var(--color-sun); color: var(--color-accent-900); }
+.tag-accent-2 { background: var(--color-accent-2-200); color: var(--color-accent-2-800); }
