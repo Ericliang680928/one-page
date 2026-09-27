@@ -10,6 +10,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;800&display=swap" rel="stylesheet">
+<script src="image-slot.js"></script>
 <style>
 html,body{margin:0;padding:0;background:#fdf9ef;color:#233a1f;font-family:'Noto Sans TC',sans-serif;-webkit-font-smoothing:antialiased}
 *{box-sizing:border-box}
@@ -27,7 +28,7 @@ html{scroll-behavior:smooth}
       <img src="tahes_nobg.png" alt="TAHES logo" style="width:48px;height:48px;object-fit:contain">
       <span style="display:flex;flex-direction:column;line-height:1.1">
         <span style="font-family:'Noto Serif TC',serif;font-weight:800;font-size:20px;letter-spacing:.12em">金稼農業</span>
-        <span style="font-size:11px;letter-spacing:.25em;color:#6b7f5a;font-weight:500">TAHES · JINJIA AGRI</span>
+        <span style="font-size:11px;letter-spacing:.25em;color:#6b7f5a;font-weight:500">KING HARVEST</span>
       </span>
     </a>
     <nav style="display:flex;gap:28px;font-size:15px;font-weight:500;flex-wrap:wrap">
@@ -36,9 +37,49 @@ html{scroll-behavior:smooth}
       <a href="#story" style="color:#233a1f" style-hover="color:#e8702a">產地故事</a>
       <a href="#contact" style="color:#233a1f" style-hover="color:#e8702a">聯絡我們</a>
     </nav>
-    <a href="tel:0927799469" style="background:#2f7d32;color:#fff;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 4px 0 #1f5a22" style-hover="background:#e8702a;box-shadow:0 4px 0 #b5501a;color:#fff">訂購洽詢</a>
+    <div style="display:flex;align-items:center;gap:14px">
+      <button onClick="{{ toggleCart }}" style="position:relative;background:#fff;border:2px solid #2f7d32;color:#2f7d32;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:grid;place-items:center">
+        🛒
+        <sc-if value="{{ hasCartItems }}" hint-placeholder-val="{{ false }}">
+          <span style="position:absolute;top:-4px;right:-4px;background:#e8702a;color:#fff;font-size:11px;font-weight:800;min-width:18px;height:18px;border-radius:999px;display:grid;place-items:center;padding:0 4px">{{ cartCount }}</span>
+        </sc-if>
+      </button>
+      <a href="tel:0927799469" style="background:#2f7d32;color:#fff;padding:10px 20px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 4px 0 #1f5a22" style-hover="background:#e8702a;box-shadow:0 4px 0 #b5501a;color:#fff">訂購洽詢</a>
+    </div>
   </div>
 </header>
+
+<sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ toggleCart }}" style="position:fixed;inset:0;background:rgba(35,58,31,.4);z-index:30"></div>
+  <div style="position:fixed;top:0;right:0;bottom:0;width:min(400px,100%);background:#fdf9ef;z-index:31;box-shadow:-10px 0 40px rgba(0,0,0,.2);display:flex;flex-direction:column">
+    <div style="padding:20px 24px;border-bottom:1px solid #eadfc4;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:'Noto Serif TC',serif;font-weight:800;font-size:20px">購物車</span>
+      <button onClick="{{ toggleCart }}" style="background:none;border:none;font-size:22px;cursor:pointer;color:#233a1f">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:#6b7f5a;padding:40px 0">購物車是空的</div>
+      </sc-if>
+      <sc-for list="{{ cartItems }}" as="item" hint-placeholder-count="0">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:12px 16px">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span style="font-weight:700;font-size:15px">{{ item.name }}</span>
+            <span style="font-size:13px;color:#6b7f5a">${{ item.price }} × {{ item.qty }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button onClick="{{ item.dec }}" style="width:26px;height:26px;border-radius:50%;border:1px solid #2f7d32;background:#fff;color:#2f7d32;cursor:pointer;font-weight:700">−</button>
+            <button onClick="{{ item.inc }}" style="width:26px;height:26px;border-radius:50%;border:1px solid #2f7d32;background:#fff;color:#2f7d32;cursor:pointer;font-weight:700">＋</button>
+            <button onClick="{{ item.remove }}" style="background:none;border:none;color:#b5501a;cursor:pointer;font-size:13px;margin-left:4px">移除</button>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="padding:20px 24px;border-top:1px solid #eadfc4;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:18px"><span>總計</span><span>${{ cartTotal }}</span></div>
+      <a href="{{ mailtoHref }}" style="text-align:center;background:#f5b400;color:#233a1f;padding:14px;border-radius:999px;font-weight:700">寄送訂單 Email</a>
+    </div>
+  </div>
+</sc-if>
 
 <!-- HERO -->
 <section id="top" data-screen-label="Hero" style="position:relative;max-width:1200px;margin:0 auto;padding:56px 24px 40px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;align-items:center">
@@ -110,12 +151,21 @@ html{scroll-behavior:smooth}
       <sc-for list="{{ products }}" as="p" hint-placeholder-count="6">
         <article style="background:#fff;color:#233a1f;border-radius:28px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 30px rgba(0,0,0,.15);transition:transform .2s" style-hover="transform:translateY(-6px)">
           <div style="position:relative;aspect-ratio:1/1;overflow:hidden">
-            <img src="{{ p.img }}" alt="{{ p.name }}" style="width:100%;height:100%;object-fit:cover;object-position:{{ p.pos }};display:block">
+            <sc-if value="{{ p.isPlaceholder }}" hint-placeholder-val="{{ false }}">
+              <image-slot id="{{ p.key }}" placeholder="{{ p.name }}照片" style="width:100%;height:100%"></image-slot>
+            </sc-if>
+            <sc-if value="{{ p.notPlaceholder }}" hint-placeholder-val="{{ true }}">
+              <img src="{{ p.img }}" alt="{{ p.name }}" style="width:100%;height:100%;object-fit:cover;object-position:{{ p.pos }};display:block">
+            </sc-if>
           </div>
           <div style="padding:22px 22px 24px;display:flex;flex-direction:column;gap:8px;flex:1">
             <span style="align-self:flex-start;background:{{ p.color }};color:#fff;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.1em">{{ p.tag }}</span>
             <h3 style="margin:0;font-family:'Noto Serif TC',serif;font-weight:800;font-size:24px">{{ p.name }}</h3>
             <p style="margin:0;font-size:14px;color:#6b7f5a;line-height:1.6">{{ p.desc }}</p>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+              <span style="font-weight:800;font-size:18px;color:#e8702a">$130</span>
+              <button onClick="{{ p.addToCart }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer">加入購物車</button>
+            </div>
           </div>
         </article>
       </sc-for>
@@ -142,10 +192,18 @@ html{scroll-behavior:smooth}
       <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #eadfc4"><div style="font-size:12px;color:#6b7f5a;letter-spacing:.1em">保存</div><div style="font-weight:700;margin-top:4px;line-height:1.5">需冷藏 5°C 以下，冷藏 14 天</div></div>
       <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #eadfc4"><div style="font-size:12px;color:#6b7f5a;letter-spacing:.1em">熱量</div><div style="font-weight:700;margin-top:4px;line-height:1.5">每 100 毫升 16.2 大卡</div></div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px"><div><div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">300ml</div><div style="font-weight:700;margin-top:4px;font-size:18px">1瓶 $70<br>1箱15瓶 $900</div></div><button onClick="{{ addWater300 }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
+      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px"><div><div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">900ml</div><div style="font-weight:700;margin-top:4px;font-size:18px">1瓶 $210<br>2瓶裝 $360</div></div><button onClick="{{ addWater900 }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <span style="background:#e6f2d9;color:#2f7d32;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700">100% Plant-Based</span>
       <span style="background:#e6f2d9;color:#2f7d32;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700">Vegan Friendly</span>
       <span style="background:#fde4d3;color:#b5501a;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700">無添加防腐劑</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <div style="background:#fff;border-radius:18px;padding:16px"><div style="font-size:12px;color:#6b7f5a;letter-spacing:.1em">70g／包</div><div style="font-weight:700;margin-top:4px"><span style="text-decoration:line-through;color:#a9b89a;font-size:14px">$150</span> <span style="color:#e8702a;font-size:20px">$130</span></div></div>
+      <div style="background:#fff;border-radius:18px;padding:16px"><div style="font-size:12px;color:#6b7f5a;letter-spacing:.1em">禮盒組 5 包裝</div><div style="font-weight:700;margin-top:4px;font-size:20px;color:#e8702a">$600</div></div>
     </div>
   </div>
 </section>
@@ -158,6 +216,11 @@ html{scroll-behavior:smooth}
       <span style="font-size:13px;font-weight:700;letter-spacing:.3em;color:#e8702a">FROM MOUNTAIN TO WELLNESS</span>
       <h2 style="margin:0;font-family:'Noto Serif TC',serif;font-weight:800;font-size:clamp(32px,4vw,48px);line-height:1.2">苗栗小農，自己種植、自己熬煮</h2>
       <p style="margin:0;font-size:17px;line-height:1.75;color:#4d5f44;text-wrap:pretty">金稼農業從苗栗南庄山林出發。不使用化學肥料與農藥，尊重自然、順應時節，支持在地農民建立穩定收入，把土地的故事透過品牌傳遞出去。</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+        <div style="background:#fff;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px"><div><div style="font-weight:800;font-size:18px;color:#2f7d32">山藏・有機黑木耳乾</div><div style="font-size:14px;color:#6b7f5a;margin:6px 0">500克／包</div><div style="font-weight:700;font-size:22px;color:#e8702a">$500</div></div><button onClick="{{ addBlackFungus }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
+        <div style="background:#fff;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:10px"><div><div style="font-weight:800;font-size:18px;color:#2f7d32">山藏・有機椴木香菇乾</div><div style="font-size:14px;color:#6b7f5a;margin:6px 0">300克／包</div><div style="font-weight:700;font-size:22px;color:#e8702a">$1,300</div></div><button onClick="{{ addMushroom }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
+      </div>
+      <div style="font-size:13px;color:#6b7f5a">＊運費另加：冷藏 $100、常溫 $80</div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));grid-auto-rows:240px;grid-auto-flow:dense;gap:16px">
       <img src="photo/1479067_0.jpg" alt="南庄黑木耳菇寮" style="grid-column:span 2;width:100%;height:100%;object-fit:cover;border-radius:24px;display:block">
@@ -189,7 +252,7 @@ html{scroll-behavior:smooth}
     <p style="margin:0;font-size:17px;line-height:1.75;color:#4d5f44">歡迎團購、店家合作與企業採購洽詢。加入官方 LINE，第一手掌握新品與產季消息。</p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
       <a href="tel:0927799469" style="background:#f5b400;color:#233a1f;padding:14px 28px;border-radius:999px;font-weight:700;font-size:16px;box-shadow:0 5px 0 #d99a00" style-hover="background:#ffc61a;color:#233a1f">📞 0927-799-469</a>
-      <a href="#" style="background:#06c755;color:#fff;padding:14px 28px;border-radius:999px;font-weight:700;font-size:16px;box-shadow:0 5px 0 #059a42" style-hover="background:#1ed468;color:#fff">加入官方 LINE</a>
+      <a href="https://line.me/R/ti/p/@ttf0006b" target="_blank" rel="noopener" style="background:#06c755;color:#fff;padding:14px 28px;border-radius:999px;font-weight:700;font-size:16px;box-shadow:0 5px 0 #059a42" style-hover="background:#1ed468;color:#fff">加入官方 LINE</a>
     </div>
   </div>
   <div style="background:#fff;border-radius:32px;padding:32px;display:flex;flex-direction:column;gap:20px;border:1px solid #eadfc4;box-shadow:0 20px 50px rgba(35,58,31,.08)">
@@ -201,7 +264,7 @@ html{scroll-behavior:smooth}
 
 <footer style="background:#233a1f;color:#d9ecd4;padding:32px 24px">
   <div style="max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;font-size:13px">
-    <span style="font-family:'Noto Serif TC',serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:.12em">金稼農業 <span style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:12px;letter-spacing:.2em;color:#a9c9a0">TAHES · JINJIA AGRI</span></span>
+    <span style="font-family:'Noto Serif TC',serif;font-weight:800;font-size:18px;color:#fff;letter-spacing:.12em">金稼農業 <span style="font-family:'Noto Sans TC',sans-serif;font-weight:500;font-size:12px;letter-spacing:.2em;color:#a9c9a0">KING HARVEST</span></span>
     <span>From Mountain to Wellness · Crafted in Taiwan</span>
   </div>
 </footer>
@@ -210,7 +273,41 @@ html{scroll-behavior:smooth}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;seriesName&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;森活原脆&quot;,&quot;options&quot;:[&quot;森活原脆&quot;,&quot;即鮮輕脆食&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;產品系列&quot;}}">
 class Component extends DCLogic {
+  state = { cart: {}, cartOpen: false };
+
+  addItem(id, name, price) {
+    this.setState(s => {
+      const cart = { ...s.cart };
+      cart[id] = cart[id] ? { ...cart[id], qty: cart[id].qty + 1 } : { id, name, price, qty: 1 };
+      return { cart, cartOpen: true };
+    });
+  }
+  incItem(id) { this.setState(s => ({ cart: { ...s.cart, [id]: { ...s.cart[id], qty: s.cart[id].qty + 1 } } })); }
+  decItem(id) {
+    this.setState(s => {
+      const item = s.cart[id];
+      if (!item) return {};
+      const cart = { ...s.cart };
+      if (item.qty <= 1) delete cart[id]; else cart[id] = { ...item, qty: item.qty - 1 };
+      return { cart };
+    });
+  }
+  removeItem(id) { this.setState(s => { const cart = { ...s.cart }; delete cart[id]; return { cart }; }); }
+  toggleCart = () => this.setState(s => ({ cartOpen: !s.cartOpen }));
+
   renderVals() {
+    const cart = this.state.cart;
+    const cartItems = Object.values(cart).map(item => ({
+      ...item,
+      inc: () => this.incItem(item.id),
+      dec: () => this.decItem(item.id),
+      remove: () => this.removeItem(item.id),
+    }));
+    const cartCount = cartItems.reduce((n, i) => n + i.qty, 0);
+    const cartTotal = cartItems.reduce((n, i) => n + i.qty * i.price, 0);
+    const bodyLines = cartItems.map(i => `${i.name} x${i.qty}  $${i.price * i.qty}`);
+    bodyLines.push('', `總計：$${cartTotal}`, '', '姓名：', '電話：', '寄送地址：');
+    const mailtoHref = 'mailto:tahes118@gmail.com?subject=' + encodeURIComponent('金稼農業訂購') + '&body=' + encodeURIComponent(bodyLines.join('\n'));
     const seriesName = this.props.seriesName ?? '森活原脆';
     const suffix = seriesName === '森活原脆' ? '原脆' : '脆片';
     const products = [
@@ -219,9 +316,18 @@ class Component extends DCLogic {
       { key: 'melon', name: '哈密瓜' + suffix, tag: '嚴選哈密瓜', desc: '自然果香，清甜爽口。', img: 'photo/1479020_0.jpg', pos: 'center 62%', color: '#8fbc3a' },
       { key: 'okra', name: '秋葵' + suffix, tag: '嚴選秋葵', desc: '清爽不黏口，富含膳食纖維。', img: 'photo/1479025_0.jpg', pos: 'center 55%', color: '#2f7d32' },
       { key: 'banana', name: '香蕉' + suffix, tag: '台灣香蕉', desc: '香甜酥脆，大人小孩最愛。', img: 'photo/1479022_0.jpg', pos: 'center 68%', color: '#f5b400' },
-      { key: 'burdock', name: '牛蒡' + suffix, tag: '嚴選牛蒡', desc: '香氣獨特，回甘不苦澀。', img: 'photo/1479021_0.jpg', pos: 'center 64%', color: '#8a5a00' },
-    ];
-    return { seriesName, products };
+      { key: 'pineapple', name: '鳳梨' + suffix, tag: '嚴選鳳梨', desc: '酸甜果香，越嚼越涮嘴。', img: 'pineapple.jpg', pos: 'center 68%', color: '#e8a900', isPlaceholder: false },
+    ].map(p => ({ ...p, notPlaceholder: !p.isPlaceholder, addToCart: () => this.addItem(p.key, p.name, 130) }));
+
+    return {
+      seriesName, products,
+      cartOpen: this.state.cartOpen, toggleCart: this.toggleCart,
+      cartItems, cartCount, cartTotal, hasCartItems: cartCount > 0, cartEmpty: cartItems.length === 0, mailtoHref,
+      addWater300: () => this.addItem('water300', '水藏黑潤原露 300ml', 70),
+      addWater900: () => this.addItem('water900', '水藏黑潤原露 900ml', 210),
+      addBlackFungus: () => this.addItem('blackfungus', '山藏有機黑木耳乾 500g', 500),
+      addMushroom: () => this.addItem('mushroom', '山藏有機椴木香菇乾 300g', 1300),
+    };
   }
 }
 </script>
