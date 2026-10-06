@@ -74,8 +74,11 @@ html{scroll-behavior:smooth}
         </div>
       </sc-for>
     </div>
-    <div style="padding:20px 24px;border-top:1px solid #eadfc4;display:flex;flex-direction:column;gap:12px">
+    <div style="padding:20px 24px;border-top:1px solid #eadfc4;display:flex;flex-direction:column;gap:10px">
       <div style="display:flex;justify-content:space-between;font-weight:800;font-size:18px"><span>總計</span><span>${{ cartTotal }}</span></div>
+      <input value="{{ custName }}" onChange="{{ setCustName }}" placeholder="姓名" style="padding:10px 14px;border-radius:12px;border:1px solid #eadfc4;font-size:14px;background:#fff">
+      <input value="{{ custPhone }}" onChange="{{ setCustPhone }}" placeholder="電話" style="padding:10px 14px;border-radius:12px;border:1px solid #eadfc4;font-size:14px;background:#fff">
+      <input value="{{ custAddress }}" onChange="{{ setCustAddress }}" placeholder="寄送地址" style="padding:10px 14px;border-radius:12px;border:1px solid #eadfc4;font-size:14px;background:#fff">
       <a href="{{ mailtoHref }}" style="text-align:center;background:#f5b400;color:#233a1f;padding:14px;border-radius:999px;font-weight:700">寄送訂單 Email</a>
     </div>
   </div>
@@ -281,7 +284,7 @@ html{scroll-behavior:smooth}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;seriesName&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;森活原脆&quot;,&quot;options&quot;:[&quot;森活原脆&quot;,&quot;即鮮輕脆食&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;產品系列&quot;}}">
 class Component extends DCLogic {
-  state = { cart: {}, cartOpen: false };
+  state = { cart: {}, cartOpen: false, custName: '', custPhone: '', custAddress: '' };
 
   addItem(id, name, price) {
     this.setState(s => {
@@ -314,7 +317,7 @@ class Component extends DCLogic {
     const cartCount = cartItems.reduce((n, i) => n + i.qty, 0);
     const cartTotal = cartItems.reduce((n, i) => n + i.qty * i.price, 0);
     const bodyLines = cartItems.map(i => `${i.name} x${i.qty}  $${i.price * i.qty}`);
-    bodyLines.push('', `總計：$${cartTotal}`, '', '姓名：', '電話：', '寄送地址：');
+    bodyLines.push('', `總計：$${cartTotal}`, '', `姓名：${this.state.custName}`, `電話：${this.state.custPhone}`, `寄送地址：${this.state.custAddress}`);
     const mailtoHref = 'mailto:tahes118@gmail.com?subject=' + encodeURIComponent('金稼農業訂購') + '&body=' + encodeURIComponent(bodyLines.join('\n'));
     const seriesName = this.props.seriesName ?? '森活原脆';
     const suffix = seriesName === '森活原脆' ? '原脆' : '脆片';
@@ -331,6 +334,10 @@ class Component extends DCLogic {
       seriesName, products,
       cartOpen: this.state.cartOpen, toggleCart: this.toggleCart,
       cartItems, cartCount, cartTotal, hasCartItems: cartCount > 0, cartEmpty: cartItems.length === 0, mailtoHref,
+      custName: this.state.custName, custPhone: this.state.custPhone, custAddress: this.state.custAddress,
+      setCustName: e => this.setState({ custName: e.target.value }),
+      setCustPhone: e => this.setState({ custPhone: e.target.value }),
+      setCustAddress: e => this.setState({ custAddress: e.target.value }),
       addWater300: () => this.addItem('water300', '水藏黑潤原露 300ml 1瓶', 70),
       addWater300Box: () => this.addItem('water300box', '水藏黑潤原露 300ml 1箱(15瓶)', 900),
       addWater900: () => this.addItem('water900', '水藏黑潤原露 900ml 1瓶', 210),
