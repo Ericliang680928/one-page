@@ -193,8 +193,16 @@ html{scroll-behavior:smooth}
       <div style="background:#fff;border-radius:18px;padding:16px;border:1px solid #eadfc4"><div style="font-size:12px;color:#6b7f5a;letter-spacing:.1em">熱量</div><div style="font-weight:700;margin-top:4px;line-height:1.5">每 100 毫升 16.2 大卡</div></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
-      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px"><div><div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">300ml</div><div style="font-weight:700;margin-top:4px;font-size:18px">1瓶 $70<br>1箱15瓶 $900</div></div><button onClick="{{ addWater300 }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
-      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px"><div><div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">900ml</div><div style="font-weight:700;margin-top:4px;font-size:18px">1瓶 $210<br>2瓶裝 $360</div></div><button onClick="{{ addWater900 }}" style="background:#2f7d32;color:#fff;border:none;padding:8px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start">加入購物車</button></div>
+      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">300ml</div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:16px">1瓶 $70</span><button onClick="{{ addWater300 }}" style="background:#2f7d32;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer">加入購物車</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:16px">1箱15瓶 $900</span><button onClick="{{ addWater300Box }}" style="background:#2f7d32;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer">加入購物車</button></div>
+      </div>
+      <div style="background:#fff3c4;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:12px;color:#8a5a00;letter-spacing:.1em">900ml</div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:16px">1瓶 $210</span><button onClick="{{ addWater900 }}" style="background:#2f7d32;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer">加入購物車</button></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:16px">2瓶裝 $360</span><button onClick="{{ addWater900Pair }}" style="background:#2f7d32;color:#fff;border:none;padding:6px 14px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer">加入購物車</button></div>
+      </div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <span style="background:#e6f2d9;color:#2f7d32;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:700">100% Plant-Based</span>
@@ -323,8 +331,10 @@ class Component extends DCLogic {
       seriesName, products,
       cartOpen: this.state.cartOpen, toggleCart: this.toggleCart,
       cartItems, cartCount, cartTotal, hasCartItems: cartCount > 0, cartEmpty: cartItems.length === 0, mailtoHref,
-      addWater300: () => this.addItem('water300', '水藏黑潤原露 300ml', 70),
-      addWater900: () => this.addItem('water900', '水藏黑潤原露 900ml', 210),
+      addWater300: () => this.addItem('water300', '水藏黑潤原露 300ml 1瓶', 70),
+      addWater300Box: () => this.addItem('water300box', '水藏黑潤原露 300ml 1箱(15瓶)', 900),
+      addWater900: () => this.addItem('water900', '水藏黑潤原露 900ml 1瓶', 210),
+      addWater900Pair: () => this.addItem('water900pair', '水藏黑潤原露 900ml 2瓶裝', 360),
       addBlackFungus: () => this.addItem('blackfungus', '山藏有機黑木耳乾 500g', 500),
       addMushroom: () => this.addItem('mushroom', '山藏有機椴木香菇乾 300g', 1300),
     };
