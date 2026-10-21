@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>滿福果仁辣醬｜米樂家食材</title>
+<meta name="description" content="米樂家食材 滿福果仁辣醬：純素、香麻小辣，松子、腰果、杏仁、花生、白芝麻、葵瓜子，淨重 250 公克。拌麵、拌飯、拌豆腐、涼青菜、火鍋沾醬都合適。">
+<link rel="icon" href="assets/img/logo-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* 配色取自米樂家 logo：田地綠、日出橘／紅／黃、房子灰、田地紫、地線棕 */
+:root{--cream:#FAF6EC;--cream2:#F1E9D6;--paper:#fff;--ink:#3A3633;--ink2:#6F675F;--charcoal:#454343;
+--green:#7F9E44;--green-d:#5F7A30;--green-l:#E8EFD8;--orange:#EF8A2A;--red:#C63D1F;--red-d:#A83219;--yellow:#F3B329;--plum:#6E4763;--brown:#9C6B45;--line:#E6DDC9;
+--serif:'Noto Serif TC','Songti TC',serif;--sans:'Noto Sans TC','Microsoft JhengHei','PingFang TC',system-ui,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.7}
+img{max-width:100%;display:block}
+a{color:var(--green-d)}
+h1,h2,h3{font-family:var(--serif);color:var(--charcoal);line-height:1.25;margin:0}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+
+/* 導覽 */
+.nav{position:sticky;top:0;z-index:50;background:rgba(250,246,236,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nin{max-width:1120px;margin:0 auto;padding:0 20px;height:64px;display:flex;align-items:center;gap:6px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--charcoal);font-family:var(--serif);font-weight:700;font-size:20px;margin-right:auto}
+.brand img{height:44px;width:auto}
+.nav .lk{color:var(--ink);text-decoration:none;padding:10px 12px;font-weight:500;font-size:16px;border-radius:999px}
+.nav .lk:hover{background:var(--cream2)}
+.cartbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border-radius:999px;border:0;background:var(--red);color:#fff;font-weight:700;cursor:pointer;text-decoration:none}
+.cartbtn:hover{background:var(--red-d);color:#fff}
+.cartbtn .n{background:#fff;color:var(--red);border-radius:999px;min-width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;padding:0 6px}
+@media(max-width:820px){.nav .lk{display:none}}
+
+/* 按鈕 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;font-weight:700;font-size:18px;border:2px solid transparent;cursor:pointer;text-decoration:none;transition:background .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red-d);color:#fff}
+.btn-line{background:#fff;color:var(--green-d);border-color:var(--green)}.btn-line:hover{background:var(--green-l)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.sm{min-height:44px;padding:0 18px;font-size:16px}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;padding:56px 0 72px}
+.hero::before{content:"";position:absolute;right:-140px;top:-160px;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#F6CF8D 0%,#F3B329 38%,rgba(239,138,42,.0) 70%);opacity:.55;pointer-events:none}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:10px;color:var(--green-d);font-weight:700;letter-spacing:.14em;font-size:14px}
+.kicker::before{content:"";width:28px;height:3px;background:var(--orange);border-radius:2px}
+.hero h1{font-size:clamp(40px,6.4vw,68px);font-weight:900;margin:14px 0 8px;letter-spacing:.02em}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero .lead{font-size:20px;color:var(--ink2);max-width:30em;margin:0 0 22px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:6px 16px;font-weight:700;font-size:15px;color:var(--charcoal)}
+.chip i{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
+.chip.o i{background:var(--orange)}.chip.r i{background:var(--red)}
+.cta{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.price-hero{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--red)}
+.price-hero small{font-family:var(--sans);font-size:15px;font-weight:400;color:var(--ink2);margin-left:4px}
+.heroimg{position:relative}
+.heroimg img.main{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:28px;box-shadow:0 24px 50px -20px rgba(69,67,67,.45)}
+.heroimg .stamp{position:absolute;left:-18px;bottom:28px;width:104px;height:104px;border-radius:50%;background:var(--green);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;line-height:1.2;text-align:center;box-shadow:0 8px 20px rgba(95,122,48,.4);transform:rotate(-8deg)}
+.heroimg .stamp b{font-size:26px}.heroimg .stamp span{font-size:13px;letter-spacing:.08em}
+@media(max-width:860px){.hero{padding:32px 0 48px}.hero .wrap{grid-template-columns:1fr;gap:28px}.heroimg{order:-1}.heroimg img.main{aspect-ratio:1/1}.heroimg .stamp{left:10px;bottom:-18px;width:90px;height:90px}}
+
+/* 區塊 */
+.sec{padding:72px 0}
+.sec.alt{background:var(--paper)}
+.sec.tint{background:var(--green-l)}
+.sec h2{font-size:clamp(28px,4vw,40px);font-weight:900;text-align:center}
+.sec .sub{text-align:center;color:var(--ink2);margin:10px auto 40px;max-width:36em}
+.sec .lbl{display:block;text-align:center;color:var(--orange);font-weight:700;letter-spacing:.2em;font-size:13px;margin-bottom:8px}
+@media(max-width:720px){.sec{padding:52px 0}}
+
+/* 特色 */
+.feat{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.fcard{background:var(--cream);border-radius:20px;padding:26px 22px;border:1px solid var(--line)}
+.fcard .ic{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:#fff}
+.fcard h3{font-size:21px;margin-bottom:6px}
+.fcard p{margin:0;color:var(--ink2);font-size:15.5px;line-height:1.65}
+@media(max-width:980px){.feat{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.feat{grid-template-columns:1fr}}
+
+/* 果仁 */
+.nuts{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:0 0 34px}
+.nut{background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 20px;font-family:var(--serif);font-weight:700;font-size:18px;color:var(--charcoal)}
+.nut:nth-child(3n+1){border-color:var(--green)}.nut:nth-child(3n+2){border-color:var(--orange)}.nut:nth-child(3n){border-color:var(--plum)}
+
+/* 吃法 */
+.eat{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.eat figure{margin:0;position:relative;border-radius:20px;overflow:hidden;background:var(--cream2)}
+.eat img{width:100%;aspect-ratio:4/5;object-fit:cover;transition:transform .5s}
+.eat figure:hover img{transform:scale(1.04)}
+.eat figcaption{position:absolute;left:0;right:0;bottom:0;padding:44px 16px 14px;background:linear-gradient(to top,rgba(58,54,51,.78),rgba(58,54,51,0));color:#fff;font-family:var(--serif);font-weight:700;font-size:20px}
+.also{text-align:center;margin-top:26px;color:var(--ink2)}
+.also b{color:var(--red)}
+@media(max-width:900px){.eat{grid-template-columns:repeat(2,1fr)}}
+
+/* 規格 */
+.spec{max-width:760px;margin:0 auto;background:var(--paper);border-radius:22px;border:1px solid var(--line);overflow:hidden}
+.spec dl{margin:0}
+.spec .r{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+.spec .r:last-child{border-bottom:0}
+.spec dt{font-weight:700;color:var(--green-d)}
+.spec dd{margin:0}
+.spec .warn{background:#FFF6E5;color:#7A4B00}
+@media(max-width:520px){.spec .r{grid-template-columns:1fr;gap:2px;padding:14px 18px}}
+
+/* 購買 */
+.shop{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+@media(max-width:980px){.shop{grid-template-columns:minmax(0,1fr)}}
+.notice{background:#FFF6E5;border:1px solid #F0D9A8;color:#7A4B00;border-radius:14px;padding:12px 18px;margin:0 auto 24px;max-width:760px;text-align:center;font-weight:500}
+.prod{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:18px;display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:24px;margin-bottom:18px}
+.prod .pic{display:flex;flex-direction:column;gap:10px}
+.prod .big{border-radius:16px;overflow:hidden;aspect-ratio:4/5;background:var(--cream2)}
+.prod .big img{width:100%;height:100%;object-fit:cover}
+.thumbs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.thumbs button{flex:none;width:54px;height:54px;border-radius:10px;overflow:hidden;border:2px solid transparent;padding:0;cursor:pointer;background:none;opacity:.7}
+.thumbs button.on{border-color:var(--orange);opacity:1}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.prod h3{font-size:26px;font-weight:900}
+.prod .psub{color:var(--ink2);margin:4px 0 10px}
+.prod .pdesc{color:var(--ink2);font-size:15.5px;white-space:pre-line;margin:0 0 14px}
+.prod .pr{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--red)}
+.prod .pr small{font-family:var(--sans);font-size:15px;color:var(--ink2);font-weight:400}
+.promo{display:inline-block;background:var(--green-l);color:var(--green-d);font-weight:700;border-radius:10px;padding:6px 12px;font-size:15px;margin:6px 0 12px}
+.buyrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+.stepper{display:inline-flex;align-items:center;border:2px solid var(--line);border-radius:999px;background:#fff}
+.stepper button{width:46px;height:46px;border:0;background:none;font-size:24px;cursor:pointer;color:var(--charcoal);border-radius:50%}
+.stepper button:hover{background:var(--cream2)}
+.stepper span{min-width:34px;text-align:center;font-weight:700}
+.soldout{display:inline-block;background:var(--cream2);color:var(--ink2);border-radius:999px;padding:8px 18px;font-weight:700}
+@media(max-width:640px){.prod{grid-template-columns:1fr}}
+.cart{position:sticky;top:80px;background:var(--paper);border:2px solid var(--green);border-radius:24px;padding:22px;display:flex;flex-direction:column;gap:14px}
+@media(max-width:980px){.cart{position:static}}
+.cart h3{font-size:24px}
+.crow{display:flex;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.crow .nm{flex:1;min-width:0;font-weight:700;line-height:1.35}
+.crow .nm small{display:block;font-weight:400;color:var(--ink2)}
+.crow .free{color:var(--green-d);font-weight:700}
+.crow .stepper button{width:38px;height:38px;font-size:20px}
+.empty{background:var(--cream);border-radius:14px;padding:22px;text-align:center;color:var(--ink2)}
+.sum{display:flex;flex-direction:column;gap:4px;font-size:16px}
+.sum div{display:flex;justify-content:space-between}
+.sum .tot{font-size:22px;font-weight:700;border-top:2px solid var(--line);padding-top:8px;margin-top:4px}
+.sum .tot b{color:var(--red);font-family:var(--serif);font-size:28px}
+.sum .hint{font-size:14px;color:var(--green-d);font-weight:500}
+form.f{display:flex;flex-direction:column;gap:12px;border-top:2px solid var(--line);padding-top:16px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label,.fld .lb{font-size:14.5px;font-weight:700;color:var(--charcoal)}
+.in{width:100%;min-height:50px;border:2px solid var(--line);border-radius:12px;padding:0 14px;background:#fff}
+textarea.in{min-height:84px;padding:12px 14px;resize:vertical}
+.in:focus{border-color:var(--green);outline:3px solid rgba(127,158,68,.3)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:48px;border:2px solid var(--line);border-radius:12px;cursor:pointer;font-weight:700;text-align:center;padding:0 8px;background:#fff}
+.seg input{position:absolute;opacity:0}
+.seg input:checked+span{color:var(--green-d)}
+.seg label:has(input:checked){border-color:var(--green);background:var(--green-l)}
+.seg label:has(input:focus-visible){outline:3px solid var(--orange);outline-offset:2px}
+.msg{border-radius:12px;padding:12px 14px;font-size:15px}
+.msg.err{background:#FBE9E4;color:#8A2B15;border:1px solid #F1C2B6}
+.done{background:var(--green-l);border:2px solid var(--green);border-radius:18px;padding:20px;color:var(--green-d)}
+.done b.no{font-size:22px;color:var(--charcoal);letter-spacing:.04em}
+.fine{font-size:13.5px;color:var(--ink2);line-height:1.6}
+
+/* 關於 */
+.about{display:grid;grid-template-columns:260px 1fr;gap:44px;align-items:center;max-width:900px;margin:0 auto}
+.about img{width:100%;max-width:260px;margin:0 auto}
+.about h2{text-align:left}
+.about p{color:var(--ink2);margin:14px 0}
+.stores{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.stores span{background:#fff;border:1.5px solid var(--green);color:var(--green-d);border-radius:999px;padding:6px 16px;font-weight:700;font-size:15px}
+@media(max-width:720px){.about{grid-template-columns:1fr;text-align:center;gap:20px}.about h2{text-align:center}.stores{justify-content:center}}
+
+/* FAQ */
+.faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.faq details{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:0 20px}
+.faq summary{cursor:pointer;padding:16px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px;color:var(--charcoal)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"＋";color:var(--orange);font-weight:900}
+.faq details[open] summary::after{content:"－"}
+.faq details p{margin:0 0 16px;color:var(--ink2)}
+
+footer{background:var(--charcoal);color:#D8D2C8;padding:36px 20px;text-align:center;font-size:14.5px}
+footer img{height:64px;margin:0 auto 12px;filter:drop-shadow(0 0 0 #fff)}
+footer .bg{display:inline-block;background:var(--cream);border-radius:18px;padding:10px 18px;margin-bottom:14px}
+footer .bg img{margin:0;height:56px}
+
+/* 浮動購物車 */
+.fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:60;width:62px;height:62px;border-radius:50%;border:0;background:var(--red);color:#fff;box-shadow:0 8px 22px rgba(168,50,25,.45);cursor:pointer;display:none;align-items:center;justify-content:center;padding:0}
+.fab svg{width:28px;height:28px}
+.fab .n{position:absolute;top:-4px;right:-4px;min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:var(--yellow);color:var(--charcoal);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+@media(max-width:980px){.fab.show{display:flex}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:70;background:var(--charcoal);color:#fff;border-radius:999px;padding:12px 22px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100vw - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}.eat figure:hover img{transform:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div class="nin">
+  <a class="brand" href="#top"><img src="assets/img/logo-mark.png" alt="">米樂家食材</a>
+  <a class="lk" href="#feature">產品特色</a><a class="lk" href="#eat">怎麼吃</a><a class="lk" href="#spec">成分規格</a><a class="lk" href="#about">關於米樂家</a>
+  <a class="cartbtn" href="#buy" id="navCart">立即購買 <span class="n" id="navN">0</span></a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div>
+    <span class="kicker">MILLET’S HOME ・ 米樂家食材</span>
+    <h1>滿福<em>果仁</em>辣醬</h1>
+    <p class="lead">松子、腰果、杏仁、花生、白芝麻、葵瓜子，拌進香麻小辣裡。一罐純素的果仁辣醬，讓拌麵、拌飯、拌青菜都有好滋味。</p>
+    <div class="chips"><span class="chip"><i></i>純素</span><span class="chip o"><i></i>香麻小辣</span><span class="chip r"><i></i>淨重 250 公克</span></div>
+    <div class="cta">
+      <a class="btn btn-red" href="#buy">我要訂購</a>
+      <span class="price-hero" id="heroPrice">NT$ 350<small>／罐</small></span>
+    </div>
+  </div>
+  <div class="heroimg">
+    <img class="main" src="assets/img/jar-1.jpg" alt="米樂家滿福果仁辣醬一罐，旁邊是松子、腰果、杏仁、葵瓜子">
+    <div class="stamp"><b>純素</b><span>香麻小辣</span></div>
+  </div>
+</div></header>
+
+<section class="sec alt" id="feature"><div class="wrap">
+  <span class="lbl">FEATURES</span><h2>一罐，裝滿六種果仁</h2>
+  <p class="sub">不用多做什麼，舀一匙拌下去，就有香氣、有口感。</p>
+  <div class="feat">
+    <div class="fcard"><div class="ic" style="background:var(--green)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c3-6 6-9 11-12"/></svg></div><h3>純素</h3><p>不含動物性成分的素食辣醬，全家人、吃素的朋友都能一起享用。</p></div>
+    <div class="fcard"><div class="ic" style="background:var(--orange)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1 .5-2 1-3 .5 1 1 1.5 2 1.5C11 6 11 4 12 2z"/><path d="M7 16a5 5 0 0 0 10 0"/></svg></div><h3>香麻小辣</h3><p>香氣先到、麻感在後，辣度不嗆，小朋友以外的大人小孩都容易入口。</p></div>
+    <div class="fcard"><div class="ic" style="background:var(--plum)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><circle cx="12" cy="16" r="3"/></svg></div><h3>六種果仁種籽</h3><p>松子、腰果、杏仁、花生、白芝麻、葵瓜子，每一口都吃得到顆粒的口感。</p></div>
+    <div class="fcard"><div class="ic" style="background:var(--brown)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1.5-1.5 1.5-3M13 7c0-1.5 1.5-1.5 1.5-3"/></svg></div><h3>一罐百搭</h3><p>拌麵、拌飯、拌豆腐、涼拌青菜，也能當火鍋沾醬、水餃沾醬。</p></div>
+  </div>
+</div></section>
+
+<section class="sec" id="eat"><div class="wrap">
+  <span class="lbl">HOW TO ENJOY</span><h2>怎麼吃都對味</h2>
+  <p class="sub">在家簡單舀一匙，餐桌馬上多一道。</p>
+  <div class="eat">
+    <figure><img loading="lazy" src="assets/img/team.jpg" alt="一碗拌了果仁辣醬的拌麵"><figcaption>拌麵</figcaption></figure>
+    <figure><img loading="lazy" src="assets/img/jar-2.jpg" alt="水餃沾果仁辣醬"><figcaption>沾水餃</figcaption></figure>
+    <figure><img loading="lazy" src="assets/img/jar-3.jpg" alt="燙青菜淋上果仁辣醬"><figcaption>拌涼青菜</figcaption></figure>
+    <figure><img loading="lazy" src="assets/img/jar-4.jpg" alt="嫩豆腐淋上果仁辣醬"><figcaption>拌豆腐</figcaption></figure>
+  </div>
+  <p class="also">還有 <b>拌飯</b>、<b>火鍋沾醬</b>……想得到的，都可以試試。</p>
+</div></section>
+
+<section class="sec tint" id="spec"><div class="wrap">
+  <span class="lbl">SPECIFICATIONS</span><h2>成分與規格</h2>
+  <p class="sub">下單前先看清楚，吃得安心。</p>
+  <div class="spec"><dl>
+    <div class="r"><dt>品名</dt><dd>滿福果仁辣醬</dd></div>
+    <div class="r"><dt>淨重</dt><dd>250 公克／罐</dd></div>
+    <div class="r"><dt>口味</dt><dd>香麻小辣</dd></div>
+    <div class="r"><dt>素食</dt><dd>純素</dd></div>
+    <div class="r"><dt>內含</dt><dd>松子、腰果、杏仁、花生、白芝麻、葵瓜子</dd></div>
+    <div class="r warn"><dt>過敏原</dt><dd>含堅果類、花生、芝麻、大豆、含麩質穀物。完整成分、營養標示與有效日期請以瓶身標示為準。</dd></div>
+  </dl></div>
+</div></section>
+
+<section class="sec alt" id="buy"><div class="wrap">
+  <span class="lbl">ORDER</span><h2>線上訂購</h2>
+  <p class="sub">填好收件資料送出訂單，米樂家會與您確認付款與出貨。</p>
+  <div class="notice" id="notice" hidden></div>
+  <div class="shop">
+    <div id="prods"></div>
+    <aside class="cart" id="cart" aria-live="polite">
+      <h3 class="serif">購物車</h3>
+      <div id="cartList"></div>
+      <div class="sum" id="sum"></div>
+      <div class="msg err" id="err" hidden></div>
+      <form class="f" id="form" hidden novalidate>
+        <div class="fld"><label for="f-name">收件人姓名</label><input class="in" id="f-name" autocomplete="name" required maxlength="40"></div>
+        <div class="fld"><label for="f-tel">聯絡電話</label><input class="in" id="f-tel" type="tel" inputmode="tel" autocomplete="tel" required placeholder="09xx-xxx-xxx" maxlength="20"></div>
+        <div class="fld"><span class="lb">取貨方式</span>
+          <div class="seg" id="segDeliv"><label><input type="radio" name="deliv" value="宅配" checked><span>宅配到府</span></label><label><input type="radio" name="deliv" value="門市自取"><span>門市自取</span></label></div></div>
+        <div class="fld" id="addrBox"><label for="f-addr">收件地址</label><input class="in" id="f-addr" autocomplete="street-address" maxlength="200" placeholder="縣市、鄉鎮、路街、門牌"></div>
+        <div class="fld" id="storeBox" hidden><label for="f-store">取貨門市</label><select class="in" id="f-store"></select></div>
+        <div class="fld"><span class="lb">付款方式</span><div class="seg" id="segPay"></div></div>
+        <div class="fld"><label for="f-note">備註（選填）</label><textarea class="in" id="f-note" maxlength="300" placeholder="例：希望到貨時段、送禮留言"></textarea></div>
+        <button class="btn btn-red" type="submit" id="subBtn">送出訂單</button>
+        <div class="fine">訂購資料僅供本次出貨與聯繫使用。</div>
+      </form>
+      <div class="done" id="done" hidden>
+        <div style="font-weight:700;font-size:20px;margin-bottom:6px">訂單已送出，謝謝您！</div>
+        <div>訂單編號 <b class="no" id="doneNo"></b></div>
+        <div id="doneAmt" style="margin:6px 0"></div>
+        <div id="donePay" class="fine" style="color:inherit"></div>
+        <button class="btn btn-line sm" type="button" id="again" style="margin-top:12px">再逛一次</button>
+      </div>
+    </aside>
+  </div>
+</div></section>
+
+<section class="sec" id="about"><div class="wrap">
+  <div class="about">
+    <img src="assets/img/logo-full.png" alt="米樂家食材 MILLET’S HOME 標誌：田野上的房子與日出">
+    <div>
+      <span class="lbl" style="text-align:left">ABOUT</span>
+      <h2>陪伴您找回家的味道，<br>從一碗飯開始</h2>
+      <p>米樂家食材位在苗栗，供應餐廳、小吃攤、團膳等餐飲夥伴，也服務一般家庭。滿福果仁辣醬是我們從食材出發做出來的一罐好味道，希望它成為你家餐桌上的固定班底。</p>
+      <div class="stores"><span>苑裡野草</span><span>中苗商行（中苗門市）</span><span>竹南金春發</span></div>
+    </div>
+  </div>
+</div></section>
+
+<section class="sec alt" id="faq"><div class="wrap">
+  <span class="lbl">Q &amp; A</span><h2>常見問題</h2>
+  <p class="sub"></p>
+  <div class="faq" id="faqBox"></div>
+</div></section>
+
+<footer>
+  <div class="bg"><img src="assets/img/logo-full.png" alt="米樂家食材"></div>
+  <div>米樂家食材 MILLET’S HOME・苗栗</div>
+  <div style="margin-top:6px;opacity:.8">© 2026 米樂家國際貿易有限公司　版權所有</div>
+</footer>
+
+<button type="button" class="fab" id="fab" aria-label="前往購物車"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2.5 3.5h3l2.4 11.2a1.6 1.6 0 0 0 1.6 1.3h8.1a1.6 1.6 0 0 0 1.6-1.2L21 8H6.2"/></svg><span class="n" id="fabN">0</span></button>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="config.js"></script>
+<script>
+/* 資料庫連不上時的備用商品（只供顯示，無法下單） */
+const FALLBACK=[{id:'fallback',name:'滿福果仁辣醬',subtitle:'純素・香麻小辣・淨重 250 公克',price:350,unit:'罐',
+ descr:'純素、香麻小辣，淨重 250 公克。內含松子、腰果、杏仁、花生、白芝麻、葵瓜子，拌麵、拌飯、拌豆腐、涼青菜、火鍋沾醬都合適。\n過敏原：含堅果類、花生、芝麻、大豆、含麩質穀物，詳見瓶身標示。',
+ imgs:'assets/img/jar-1.jpg|assets/img/jar-2.jpg|assets/img/jar-3.jpg|assets/img/jar-4.jpg|assets/img/team.jpg',promo_buy:0,promo_free:0,sold_out:false}];
+let PRODUCTS=[],SET={ship_fee:100,free_over:1000,stores:['苑裡野草','中苗門市','竹南金春發'],contact:'',notice:''},OFFLINE=false;
+let cart={};try{cart=JSON.parse(localStorage.getItem('mf_cart')||'{}')||{};}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Number(n).toLocaleString('en-US');
+const save=()=>{try{localStorage.setItem('mf_cart',JSON.stringify(cart));}catch(e){}};
+const prod=id=>PRODUCTS.find(p=>p.id===id);
+const imgsOf=p=>String(p.imgs||'').split('|').map(s=>s.trim()).filter(Boolean);
+const freeOf=(p,q)=>(p.promo_buy>0&&p.promo_free>0)?Math.floor(q/p.promo_buy)*p.promo_free:0;
+
+async function load(){
+  try{
+    const [ps,st]=await Promise.all([mfGet('mf_products?select=*&order=sort,created_at'),mfGet('mf_settings?select=*')]);
+    PRODUCTS=ps; st.forEach(r=>{SET[r.key]=r.value;});
+    if(!PRODUCTS.length)throw new Error('empty');
+  }catch(e){PRODUCTS=FALLBACK;OFFLINE=true;}
+  SET.ship_fee=Number(SET.ship_fee)||0;SET.free_over=Number(SET.free_over)||0;
+  Object.keys(cart).forEach(id=>{if(!prod(id)||prod(id).sold_out)delete cart[id];});
+  const p0=PRODUCTS[0];if(p0)$('heroPrice').innerHTML='NT$ '+money(p0.price)+'<small>／'+esc(p0.unit)+'</small>';
+  if(SET.notice){$('notice').textContent=SET.notice;$('notice').hidden=false;}
+  $('f-store').innerHTML=(SET.stores||[]).map(s=>'<option>'+esc(s)+'</option>').join('');
+  renderProds();renderCart();renderFaq();
+}
+function renderProds(){
+  $('prods').innerHTML=PRODUCTS.map(p=>{const im=imgsOf(p),id=esc(p.id);
+    const thumbs=im.length>1?'<div class="thumbs">'+im.map((u,k)=>'<button type="button" class="'+(k?'':'on')+'" data-pid="'+id+'" data-k="'+k+'" aria-label="看第 '+(k+1)+' 張照片"><img src="'+esc(u)+'" alt="" loading="lazy"></button>').join('')+'</div>':'';
+    const promo=(p.promo_buy>0&&p.promo_free>0)?'<div class="promo">活動：買 '+p.promo_buy+' '+esc(p.unit)+'送 '+p.promo_free+' '+esc(p.unit)+'</div>':'';
+    const act=p.sold_out?'<span class="soldout">目前售完</span>':'<button type="button" class="btn btn-red" data-add="'+id+'">加入購物車</button>';
+    return '<article class="prod"><div class="pic"><div class="big">'+(im[0]?'<img id="big-'+id+'" src="'+esc(im[0])+'" alt="'+esc(p.name)+'">':'')+'</div>'+thumbs+'</div>'
+     +'<div><h3>'+esc(p.name)+'</h3><div class="psub">'+esc(p.subtitle||'')+'</div><div class="pr">NT$ '+money(p.price)+'<small>／'+esc(p.unit)+'</small></div>'+promo+'<p class="pdesc" style="margin-top:12px">'+esc(p.descr||'')+'</p><div class="buyrow">'+act+'</div></div></article>';}).join('');
+}
+function shipInfo(sub,deliv){
+  if(deliv!=='宅配')return {ship:0,hint:''};
+  if(SET.free_over>0&&sub>=SET.free_over)return {ship:0,hint:'已達免運門檻'};
+  return {ship:SET.ship_fee,hint:(SET.free_over>0&&SET.ship_fee>0)?'再買 NT$ '+money(SET.free_over-sub)+' 即可免運':''};
+}
+const deliv=()=>document.querySelector('input[name=deliv]:checked').value;
+function renderCart(){
+  const ids=Object.keys(cart).filter(prod);let sub=0,cnt=0;
+  $('cartList').innerHTML=ids.length?ids.map(id=>{const p=prod(id),q=cart[id],f=freeOf(p,q);sub+=p.price*q;cnt+=q+f;
+    return '<div class="crow"><div class="nm">'+esc(p.name)+'<small>NT$ '+money(p.price)+' × '+q+(f?' <span class="free">＋贈 '+f+' '+esc(p.unit)+'</span>':'')+'</small></div><div class="stepper"><button type="button" data-q="-1" data-id="'+esc(id)+'" aria-label="減少">−</button><span>'+q+'</span><button type="button" data-q="1" data-id="'+esc(id)+'" aria-label="增加">＋</button></div></div>';}).join('')
+    :'<div class="empty">還沒有商品，先挑一罐吧。</div>';
+  const d=deliv(),s=shipInfo(sub,d);
+  $('sum').innerHTML=ids.length?'<div><span>商品小計</span><span>NT$ '+money(sub)+'</span></div><div><span>運費</span><span>'+(d!=='宅配'?'自取免運':s.ship?'NT$ '+money(s.ship):'免運')+'</span></div>'+(s.hint&&s.ship?'<div class="hint">'+esc(s.hint)+'</div>':'')+'<div class="tot"><span>合計</span><b>NT$ '+money(sub+s.ship)+'</b></div>':'';
+  $('form').hidden=!ids.length||OFFLINE;
+  $('navN').textContent=cnt;$('fabN').textContent=cnt;$('fab').classList.toggle('show',cnt>0);
+  if(OFFLINE&&ids.length){showErr('目前無法連線到訂購系統，請稍後重新整理頁面再試。');}
+}
+function showErr(t){const e=$('err');e.textContent=t;e.hidden=!t;}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),1800);}
+function renderPay(){
+  const opts=deliv()==='宅配'?['貨到付款','轉帳匯款']:['門市付款','轉帳匯款'];
+  const prev=(document.querySelector('input[name=pay]:checked')||{}).value,cur=opts.includes(prev)?prev:opts[0];
+  $('segPay').innerHTML=opts.map(o=>'<label><input type="radio" name="pay" value="'+o+'"'+(cur===o?' checked':'')+'><span>'+o+'</span></label>').join('');
+}
+function renderFaq(){
+  const ship=SET.ship_fee>0?('宅配運費 NT$ '+money(SET.ship_fee)+(SET.free_over>0?'，商品滿 NT$ '+money(SET.free_over)+' 免運。':'。')):'宅配免運費。';
+  const ct=SET.contact?'<br>聯絡方式：'+esc(SET.contact):'';
+  const Q=[['運費怎麼算？',ship+'選擇門市自取則不收運費。'],
+   ['可以去門市自取嗎？','可以。下單時選「門市自取」並選擇取貨門市（'+esc((SET.stores||[]).join('、'))+'），我們備貨後會與您聯繫取貨時間。'],
+   ['怎麼付款？','宅配可選貨到付款或轉帳匯款；門市自取可到店付款或轉帳匯款。選擇轉帳的話，送出訂單後米樂家會與您聯繫匯款資訊。'],
+   ['有哪些過敏原？','本產品含堅果類、花生、芝麻、大豆、含麩質穀物，對這些過敏的朋友請勿食用，完整標示請見瓶身。'],
+   ['需要大量訂購或批發嗎？','餐廳、小吃攤、團購與大量訂購歡迎直接聯繫米樂家，我們會依數量與需求報價。'+ct]];
+  $('faqBox').innerHTML=Q.map(q=>'<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>').join('');
+}
+document.addEventListener('click',e=>{
+  const a=e.target.closest('[data-add]');if(a){const id=a.dataset.add;cart[id]=Math.min(99,(cart[id]||0)+1);save();$('done').hidden=true;renderCart();toast('已加入購物車');return;}
+  const q=e.target.closest('[data-q]');if(q){const id=q.dataset.id,n=(cart[id]||0)+Number(q.dataset.q);if(n>0)cart[id]=Math.min(99,n);else delete cart[id];save();renderCart();return;}
+  const t=e.target.closest('.thumbs button');if(t){const id=t.dataset.pid,p=prod(id),im=imgsOf(p),big=document.getElementById('big-'+id);if(big)big.src=im[Number(t.dataset.k)];t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===t));}
+});
+$('fab').onclick=()=>$('cart').scrollIntoView({behavior:'smooth',block:'start'});
+$('segDeliv').addEventListener('change',()=>{const h=deliv()==='宅配';$('addrBox').hidden=!h;$('storeBox').hidden=h;renderPay();renderCart();});
+$('again').onclick=()=>{$('done').hidden=true;renderCart();};
+$('form').addEventListener('submit',async e=>{
+  e.preventDefault();showErr('');
+  const g=id=>$(id).value.trim(),d=deliv();
+  if(!g('f-name'))return showErr('請填寫收件人姓名'),$('f-name').focus();
+  if(!/^[0-9+() -]{8,20}$/.test(g('f-tel')))return showErr('請填寫正確的聯絡電話'),$('f-tel').focus();
+  if(d==='宅配'&&g('f-addr').length<5)return showErr('請填寫完整的收件地址'),$('f-addr').focus();
+  const items=Object.keys(cart).filter(prod).map(id=>({id:id,qty:cart[id]}));
+  const btn=$('subBtn');btn.disabled=true;btn.textContent='送出中…';
+  try{
+    const r=await mfRpc('mf_place_order',{p:{name:g('f-name'),tel:g('f-tel'),delivery:d==='宅配'?'宅配':$('f-store').value,pay:document.querySelector('input[name=pay]:checked').value,addr:g('f-addr'),note:g('f-note'),items:items}});
+    cart={};save();
+    $('doneNo').textContent=r.order_no;
+    $('doneAmt').textContent='應付金額 NT$ '+money(r.total)+(r.ship?'（含運費 NT$ '+money(r.ship)+'）':'');
+    const pay=document.querySelector('input[name=pay]:checked').value;
+    $('donePay').textContent=(pay==='轉帳匯款'?'請留意米樂家與您聯繫的匯款資訊。':pay==='貨到付款'?'收到商品時再付款即可。':'取貨時於門市付款。')+'我們會以您留的電話與您聯繫。'+(SET.contact?'有任何問題也可以聯絡：'+SET.contact:'');
+    $('form').reset();$('form').hidden=true;$('sum').innerHTML='';$('cartList').innerHTML='';$('done').hidden=false;renderCart();$('form').hidden=true;
+    $('done').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }catch(err){showErr(/[一-鿿]/.test(err.message)?err.message:'送出失敗，請稍後再試。');}
+  btn.disabled=false;btn.textContent='送出訂單';
+});
+renderPay();load();
+</script>
+</body>
+</html>

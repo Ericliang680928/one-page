@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>購物車後台｜米樂家滿福果仁辣醬</title>
+<link rel="icon" href="assets/img/logo-mark.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root{--cream:#FAF6EC;--cream2:#F1E9D6;--ink:#3A3633;--ink2:#6F675F;--charcoal:#454343;--green:#7F9E44;--green-d:#5F7A30;--green-l:#E8EFD8;--orange:#EF8A2A;--red:#C63D1F;--red-d:#A83219;--yellow:#F3B329;--plum:#6E4763;--line:#E6DDC9;--serif:'Noto Serif TC',serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 'Noto Sans TC','Microsoft JhengHei',system-ui,sans-serif}
+h1,h2,h3{font-family:var(--serif);margin:0;color:var(--charcoal)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+.top{background:var(--charcoal);color:#fff;position:sticky;top:0;z-index:20}
+.top .tin{max-width:1080px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:12px;min-height:60px;flex-wrap:wrap}
+.top img{height:40px;background:var(--cream);border-radius:10px;padding:2px 6px}
+.top b{font-family:var(--serif);font-size:18px}
+.top .sp{flex:1}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{min-height:44px;padding:0 18px;border-radius:999px;border:0;background:transparent;color:#E7E0D4;font-weight:700;cursor:pointer}
+.tab.on{background:var(--yellow);color:var(--charcoal)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;border:2px solid transparent;font-weight:700;cursor:pointer;background:var(--red);color:#fff}
+.btn:hover{background:var(--red-d)}
+.btn.g{background:var(--green-d)}.btn.g:hover{background:#4C6325}
+.btn.o{background:#fff;color:var(--charcoal);border-color:var(--line)}.btn.o:hover{background:var(--cream2)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+.in{width:100%;min-height:44px;border:2px solid var(--line);border-radius:10px;padding:0 12px;background:#fff}
+textarea.in{padding:10px 12px;min-height:90px;resize:vertical}
+.in:focus{border-color:var(--green)}
+label.l{display:block;font-weight:700;font-size:14px;margin-bottom:4px;color:var(--charcoal)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
+.note{color:var(--ink2);font-size:14px}
+.err{background:#FBE9E4;color:#8A2B15;border:1px solid #F1C2B6;border-radius:10px;padding:10px 14px}
+.ok{background:var(--green-l);color:var(--green-d);border:1px solid #CBDDA5;border-radius:10px;padding:10px 14px}
+
+/* login */
+#gate{max-width:380px;margin:12vh auto;text-align:center}
+#gate img{height:96px;margin:0 auto 10px}
+#gate form{display:flex;flex-direction:column;gap:12px;margin-top:16px;text-align:left}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat small{color:var(--ink2);display:block}
+.stat b{font-family:var(--serif);font-size:28px;color:var(--charcoal)}
+.stat.hot b{color:var(--red)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar .in{max-width:280px}
+.pill{min-height:38px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:#fff;font-weight:700;font-size:14px;cursor:pointer}
+.pill.on{background:var(--charcoal);border-color:var(--charcoal);color:#fff}
+.pill i{font-style:normal;opacity:.7;margin-left:4px}
+
+/* orders */
+.ord{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.ord.new{border-left:6px solid var(--red)}
+.ohead{display:grid;grid-template-columns:150px 1fr auto auto;gap:12px;align-items:center;padding:12px 16px;cursor:pointer}
+.ohead:hover{background:var(--cream)}
+.ohead .no{font-weight:700;color:var(--charcoal)}
+.ohead .tm{font-size:13px;color:var(--ink2)}
+.ohead .tt{font-family:var(--serif);font-weight:700;color:var(--red);font-size:18px;white-space:nowrap}
+@media(max-width:700px){.ohead{grid-template-columns:1fr auto}.ohead .tt{grid-column:2}}
+.st{display:inline-block;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.st.s0{background:#FBE0D8;color:#A83219}.st.s1{background:#FFF0CC;color:#7A4B00}.st.s2{background:#DDEAF7;color:#1F4F7C}.st.s3{background:var(--green-l);color:var(--green-d)}.st.s4{background:#ECE8E0;color:#6F675F}
+.obody{display:none;border-top:1px dashed var(--line);padding:14px 16px;background:#FFFDF8}
+.ord.open .obody{display:block}
+.obody dl{display:grid;grid-template-columns:90px 1fr;gap:4px 12px;margin:0 0 12px}
+.obody dt{color:var(--ink2);font-size:14px}.obody dd{margin:0;font-weight:500;word-break:break-all}
+table.it{width:100%;border-collapse:collapse;margin-bottom:12px}
+table.it th,table.it td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-size:15px}
+table.it td.n,table.it th.n{text-align:right}
+.oact{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.oact .fld{flex:1;min-width:200px}
+
+/* products */
+.prow{display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center;padding:12px;background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:10px}
+.prow img{width:72px;height:72px;border-radius:12px;object-fit:cover;background:var(--cream2)}
+.prow .nm{font-weight:700;font-size:17px}
+.prow .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:640px){.prow{grid-template-columns:56px 1fr}.prow img{width:56px;height:56px}.prow .acts{grid-column:1/-1;justify-content:flex-start}}
+.tg{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;font-size:14px;user-select:none}
+.tg input{width:20px;height:20px;accent-color:var(--green-d)}
+.imgs{display:flex;gap:10px;flex-wrap:wrap}
+.imgs .im{position:relative;width:96px}
+.imgs img{width:96px;height:120px;object-fit:cover;border-radius:10px;border:2px solid var(--line)}
+.imgs .im button{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(58,54,51,.8);color:#fff;cursor:pointer}
+.imgs .im em{position:absolute;left:4px;bottom:4px;background:var(--yellow);color:var(--charcoal);border-radius:6px;font-size:11px;font-weight:700;padding:0 6px;font-style:normal}
+.imgs .im .mv{top:auto;bottom:4px;right:4px;left:auto;font-size:12px}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="gate" class="card">
+  <img src="assets/img/logo-full.png" alt="米樂家食材">
+  <h1 style="font-size:22px">購物車後台</h1>
+  <div class="note">滿福果仁辣醬・訂單與商品管理</div>
+  <form id="loginForm">
+    <div><label class="l" for="code">通關碼</label><input class="in" id="code" type="password" autocomplete="current-password" required autofocus></div>
+    <div class="err hide" id="loginErr"></div>
+    <button class="btn" type="submit">登入</button>
+  </form>
+</div>
+
+<div id="app" class="hide">
+  <div class="top"><div class="tin">
+    <img src="assets/img/logo-mark.png" alt=""><b>購物車後台</b>
+    <nav class="tabs" role="tablist">
+      <button class="tab on" data-tab="orders" role="tab">訂單</button>
+      <button class="tab" data-tab="products" role="tab">商品上架</button>
+      <button class="tab" data-tab="settings" role="tab">設定</button>
+    </nav>
+    <span class="sp"></span>
+    <a class="btn o sm" href="index.html" target="_blank" rel="noopener">看前台</a>
+    <button class="btn o sm" id="logout" type="button">登出</button>
+  </div></div>
+
+  <main class="wrap" style="padding-bottom:60px">
+    <!-- 訂單 -->
+    <section id="pane-orders">
+      <div class="stats" id="stats"></div>
+      <div class="bar" id="fbar"></div>
+      <div class="bar"><input class="in" id="q" placeholder="搜尋：訂單編號、姓名、電話" aria-label="搜尋訂單"><button class="btn g sm" id="reload" type="button">重新整理</button><button class="btn o sm" id="csv" type="button">匯出 Excel（CSV）</button><span class="note" id="upd"></span></div>
+      <div id="olist"></div>
+    </section>
+
+    <!-- 商品 -->
+    <section id="pane-products" class="hide">
+      <div class="bar" style="margin-top:20px"><h2 style="font-size:22px">商品上架</h2><span class="sp" style="flex:1"></span><button class="btn" id="newP" type="button">＋ 新增商品</button></div>
+      <div id="plist"></div>
+      <div class="card hide" id="pform" style="margin-top:14px">
+        <h3 id="pfTitle" style="font-size:20px;margin-bottom:12px">編輯商品</h3>
+        <input type="hidden" id="p-id">
+        <div class="g2"><div><label class="l" for="p-name">商品名稱</label><input class="in" id="p-name"></div><div><label class="l" for="p-sub">副標（一行說明）</label><input class="in" id="p-sub" placeholder="例：純素・香麻小辣・淨重 250 公克"></div></div>
+        <div class="g3" style="margin-top:12px"><div><label class="l" for="p-price">單價（NT$）</label><input class="in" id="p-price" type="number" min="0" inputmode="numeric"></div><div><label class="l" for="p-unit">單位</label><input class="in" id="p-unit" value="罐"></div><div><label class="l" for="p-sort">排序（小的在前）</label><input class="in" id="p-sort" type="number" value="0"></div></div>
+        <div style="margin-top:12px"><label class="l" for="p-descr">商品介紹（可換行）</label><textarea class="in" id="p-descr" rows="5"></textarea></div>
+        <div class="g3" style="margin-top:12px"><div><label class="l" for="p-pb">活動：每買幾件</label><input class="in" id="p-pb" type="number" min="0" value="0"></div><div><label class="l" for="p-pf">送幾件（兩欄皆 0 ＝ 無活動）</label><input class="in" id="p-pf" type="number" min="0" value="0"></div><div style="display:flex;gap:18px;align-items:flex-end;padding-bottom:8px"><label class="tg"><input type="checkbox" id="p-on" checked>上架</label><label class="tg"><input type="checkbox" id="p-so">售完</label></div></div>
+        <div style="margin-top:14px"><span class="l" style="display:block;font-weight:700;font-size:14px;margin-bottom:6px">商品照片（第一張為主圖，最多 6 張）</span><div class="imgs" id="p-imgs"></div>
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap"><label class="btn o sm" style="cursor:pointer">上傳照片<input type="file" id="p-file" accept="image/*" multiple hidden></label><input class="in" id="p-url" placeholder="或貼上圖片網址（需為圖檔，例如 assets/img/xxx.jpg）" style="flex:1;min-width:220px"><button class="btn o sm" id="p-addurl" type="button">加入</button></div>
+          <div class="note" style="margin-top:6px">上傳的照片會自動縮成寬 900px 內的 JPEG。</div></div>
+        <div class="err hide" id="pErr" style="margin-top:12px"></div>
+        <div style="display:flex;gap:10px;margin-top:16px"><button class="btn g" id="pSave" type="button">儲存商品</button><button class="btn o" id="pCancel" type="button">取消</button></div>
+      </div>
+    </section>
+
+    <!-- 設定 -->
+    <section id="pane-settings" class="hide">
+      <h2 style="font-size:22px;margin:20px 0 12px">運費與店家資訊</h2>
+      <div class="card">
+        <div class="g2"><div><label class="l" for="s-fee">宅配運費（NT$，0 ＝ 免運費）</label><input class="in" id="s-fee" type="number" min="0"></div><div><label class="l" for="s-free">滿多少免運（NT$，0 ＝ 無免運門檻）</label><input class="in" id="s-free" type="number" min="0"></div></div>
+        <div style="margin-top:12px"><label class="l" for="s-stores">可自取的門市（一行一間）</label><textarea class="in" id="s-stores" rows="4"></textarea></div>
+        <div style="margin-top:12px"><label class="l" for="s-contact">顧客聯絡方式（顯示在下單完成頁與常見問題，例：電話或 LINE）</label><input class="in" id="s-contact"></div>
+        <div style="margin-top:12px"><label class="l" for="s-notice">首頁公告（購買區上方的橘黃色橫幅；留空 ＝ 不顯示）</label><input class="in" id="s-notice" placeholder="例：10/31 前下單，11/5 前出貨"></div>
+        <div id="sMsg" class="hide" style="margin-top:12px"></div>
+        <button class="btn g" id="sSave" type="button" style="margin-top:14px">儲存設定</button>
+      </div>
+      <h2 style="font-size:22px;margin:28px 0 12px">更改通關碼</h2>
+      <div class="card">
+        <div class="g2"><div><label class="l" for="c-new">新通關碼（至少 6 碼）</label><input class="in" id="c-new" type="password" autocomplete="new-password"></div><div><label class="l" for="c-new2">再輸入一次</label><input class="in" id="c-new2" type="password" autocomplete="new-password"></div></div>
+        <div id="cMsg" class="hide" style="margin-top:12px"></div>
+        <button class="btn" id="cSave" type="button" style="margin-top:14px">更改通關碼</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>Number(n||0).toLocaleString('en-US');
+const STS=['新訂單','已確認','已出貨','已完成','已取消'];
+let CODE='',ORD=[],PRD=[],FIL='全部',editImgs=[];
+const msg=(el,t,ok)=>{el.className=ok?'ok':'err';el.textContent=t;el.classList.toggle('hide',!t);};
+const errTxt=e=>e.status===401||/unauthorized/i.test(e.message)?'通關碼不正確或已失效，請重新登入':(e.message||'發生錯誤');
+async function api(fn,args){args=Object.assign({code:CODE},args||{});try{return await mfRpc(fn,args);}catch(e){if(/unauthorized|28000/i.test(e.message)){logout(true);}throw e;}}
+
+/* 登入 */
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();const c=$('code').value;
+  try{const ok=await mfRpc('mf_admin_login',{code:c});if(!ok){msg($('loginErr'),'通關碼不正確');return;}
+    CODE=c;try{sessionStorage.setItem('mf_code',c);}catch(_){}enter();}
+  catch(err){msg($('loginErr'),'無法連線到資料庫，請確認網路或 setup.sql 是否已執行');}});
+function logout(silent){CODE='';try{sessionStorage.removeItem('mf_code');}catch(_){}$('app').classList.add('hide');$('gate').classList.remove('hide');$('code').value='';if(silent===true)msg($('loginErr'),'請重新登入');else msg($('loginErr'),'');}
+$('logout').onclick=()=>logout();
+async function enter(){$('gate').classList.add('hide');$('app').classList.remove('hide');await Promise.all([loadOrders(),loadProducts(),loadSettings()]);}
+(async()=>{let c='';try{c=sessionStorage.getItem('mf_code')||'';}catch(_){}if(c){try{if(await mfRpc('mf_admin_login',{code:c})){CODE=c;enter();}}catch(_){}}})();
+
+/* 分頁 */
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));['orders','products','settings'].forEach(t=>$('pane-'+t).classList.toggle('hide',t!==b.dataset.tab));});
+
+/* 訂單 */
+const taipei=d=>new Date(d).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+const dayKey=d=>new Date(d).toLocaleDateString('sv-SE',{timeZone:'Asia/Taipei'});
+async function loadOrders(){try{ORD=await api('mf_admin_orders');}catch(e){$('olist').innerHTML='<div class="err">'+esc(errTxt(e))+'</div>';return;}
+  $('upd').textContent='更新於 '+new Date().toLocaleTimeString('zh-TW',{hour12:false});renderStats();renderOrders();}
+function renderStats(){
+  const today=dayKey(new Date()),live=ORD.filter(o=>o.status!=='已取消'),td=live.filter(o=>dayKey(o.created_at)===today);
+  const sum=a=>a.reduce((x,o)=>x+o.total,0),pend=ORD.filter(o=>o.status==='新訂單').length;
+  const jars=live.reduce((x,o)=>x+o.items.reduce((y,i)=>y+i.qty+(i.free||0),0),0);
+  $('stats').innerHTML=[['待處理新訂單',pend+' 筆',pend?'hot':''],['今日訂單',td.length+' 筆',''],['今日金額','NT$ '+money(sum(td)),''],['累計（不含取消）','NT$ '+money(sum(live))+'<small style="font-family:inherit;font-size:13px;color:var(--ink2)">　共 '+jars+' 件出貨量</small>','']].map(s=>'<div class="stat '+s[2]+'"><small>'+s[0]+'</small><b>'+s[1]+'</b></div>').join('');
+  const cnt=s=>s==='全部'?ORD.length:ORD.filter(o=>o.status===s).length;
+  $('fbar').innerHTML=['全部'].concat(STS).map(s=>'<button class="pill'+(FIL===s?' on':'')+'" data-f="'+s+'">'+s+'<i>'+cnt(s)+'</i></button>').join('');
+}
+$('fbar').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b){FIL=b.dataset.f;renderStats();renderOrders();}});
+$('q').addEventListener('input',()=>renderOrders());
+function renderOrders(){
+  const q=$('q').value.trim().toLowerCase();
+  const L=ORD.filter(o=>(FIL==='全部'||o.status===FIL)&&(!q||(o.order_no+o.name+o.tel).toLowerCase().includes(q)));
+  $('olist').innerHTML=L.length?L.map(o=>{const si=STS.indexOf(o.status);
+    const rows=o.items.map(i=>'<tr><td>'+esc(i.name)+'</td><td class="n">NT$ '+money(i.price)+'</td><td class="n">'+i.qty+(i.free?' ＋贈 '+i.free:'')+'</td><td class="n">NT$ '+money(i.price*i.qty)+'</td></tr>').join('');
+    return '<div class="ord'+(o.status==='新訂單'?' new':'')+'" id="o'+o.id+'"><div class="ohead" data-open="'+o.id+'"><div><div class="no">'+esc(o.order_no)+'</div><div class="tm">'+taipei(o.created_at)+'</div></div><div><b>'+esc(o.name)+'</b><div class="tm">'+esc(o.delivery)+'・'+esc(o.pay)+'</div></div><span class="st s'+si+'">'+esc(o.status)+'</span><span class="tt">NT$ '+money(o.total)+'</span></div>'
+    +'<div class="obody"><dl><dt>電話</dt><dd>'+esc(o.tel)+'</dd><dt>取貨方式</dt><dd>'+esc(o.delivery)+(o.addr?'｜'+esc(o.addr):'')+'</dd><dt>付款方式</dt><dd>'+esc(o.pay)+'</dd>'+(o.note?'<dt>顧客備註</dt><dd>'+esc(o.note)+'</dd>':'')+'</dl>'
+    +'<table class="it"><thead><tr><th>品項</th><th class="n">單價</th><th class="n">數量</th><th class="n">小計</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="3" class="n">運費</td><td class="n">NT$ '+money(o.ship)+'</td></tr><tr><td colspan="3" class="n"><b>合計</b></td><td class="n"><b>NT$ '+money(o.total)+'</b></td></tr></tfoot></table>'
+    +'<div class="oact"><div class="fld"><label class="l" for="st'+o.id+'">訂單狀態</label><select class="in" id="st'+o.id+'">'+STS.map(s=>'<option'+(s===o.status?' selected':'')+'>'+s+'</option>').join('')+'</select></div><div class="fld"><label class="l" for="an'+o.id+'">內部備註（只有後台看得到）</label><input class="in" id="an'+o.id+'" value="'+esc(o.admin_note||'')+'"></div><button class="btn g sm" data-saveo="'+o.id+'">儲存</button><button class="btn o sm" data-delo="'+o.id+'" style="color:var(--red)">刪除</button></div></div></div>';}).join(''):'<div class="card note" style="text-align:center">沒有符合的訂單。</div>';
+}
+$('olist').addEventListener('click',async e=>{
+  const h=e.target.closest('[data-open]');if(h){document.getElementById('o'+h.dataset.open).classList.toggle('open');return;}
+  const s=e.target.closest('[data-saveo]');if(s){const id=+s.dataset.saveo;s.disabled=true;try{await api('mf_admin_set_status',{oid:id,st:$('st'+id).value,anote:$('an'+id).value});await loadOrders();document.getElementById('o'+id)&&document.getElementById('o'+id).classList.add('open');}catch(er){alert('儲存失敗：'+errTxt(er));}s.disabled=false;return;}
+  const d=e.target.closest('[data-delo]');if(d){if(!confirm('確定永久刪除這筆訂單？（一般建議改成「已取消」即可）'))return;try{await api('mf_admin_delete_order',{oid:+d.dataset.delo});await loadOrders();}catch(er){alert('刪除失敗：'+errTxt(er));}}
+});
+$('reload').onclick=loadOrders;setInterval(()=>{if(CODE&&!$('pane-orders').classList.contains('hide'))loadOrders();},60000);
+$('csv').onclick=()=>{
+  const q=$('q').value.trim().toLowerCase(),L=ORD.filter(o=>(FIL==='全部'||o.status===FIL)&&(!q||(o.order_no+o.name+o.tel).toLowerCase().includes(q)));
+  const H=['訂單編號','下單時間','狀態','姓名','電話','取貨方式','地址','付款方式','品項明細','商品小計','運費','合計','顧客備註','內部備註'];
+  const c=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const rows=L.map(o=>[o.order_no,new Date(o.created_at).toLocaleString('sv-SE',{timeZone:'Asia/Taipei'}),o.status,o.name,"'"+o.tel,o.delivery,o.addr,o.pay,o.items.map(i=>i.name+' × '+i.qty+(i.free?'＋贈'+i.free:'')).join('；'),o.subtotal,o.ship,o.total,o.note,o.admin_note]);
+  const blob=new Blob(['﻿'+[H].concat(rows).map(r=>r.map(c).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='米樂家果仁辣醬訂單_'+dayKey(new Date())+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);};
+
+/* 商品 */
+const imgsOf=s=>String(s||'').split('|').map(x=>x.trim()).filter(Boolean);
+async function loadProducts(){try{PRD=await api('mf_admin_products');}catch(e){$('plist').innerHTML='<div class="err">'+esc(errTxt(e))+'</div>';return;}renderProducts();}
+function renderProducts(){
+  $('plist').innerHTML=PRD.length?PRD.map(p=>'<div class="prow"><img src="'+esc(imgsOf(p.imgs)[0]||'assets/img/logo-mark.png')+'" alt=""><div><div class="nm">'+esc(p.name)+'</div><div class="note">NT$ '+money(p.price)+'／'+esc(p.unit)+(p.promo_buy>0&&p.promo_free>0?'｜買 '+p.promo_buy+' 送 '+p.promo_free:'')+'｜排序 '+p.sort+'</div></div><div class="acts"><label class="tg"><input type="checkbox" data-tog="on_shelf" data-id="'+p.id+'"'+(p.on_shelf?' checked':'')+'>上架</label><label class="tg"><input type="checkbox" data-tog="sold_out" data-id="'+p.id+'"'+(p.sold_out?' checked':'')+'>售完</label><button class="btn o sm" data-edit="'+p.id+'">編輯</button><button class="btn o sm" data-delp="'+p.id+'" style="color:var(--red)">刪除</button></div></div>').join(''):'<div class="card note" style="text-align:center">還沒有商品，按右上「新增商品」。</div>';
+}
+const payload=p=>({id:p.id,name:p.name,subtitle:p.subtitle,price:p.price,unit:p.unit,descr:p.descr,imgs:p.imgs,on_shelf:p.on_shelf,sold_out:p.sold_out,sort:p.sort,promo_buy:p.promo_buy,promo_free:p.promo_free});
+$('plist').addEventListener('change',async e=>{const t=e.target.closest('[data-tog]');if(!t)return;const p=PRD.find(x=>x.id===t.dataset.id);p[t.dataset.tog]=t.checked;try{await api('mf_admin_save_product',{p:payload(p)});}catch(er){alert('更新失敗：'+errTxt(er));t.checked=!t.checked;p[t.dataset.tog]=t.checked;}});
+$('plist').addEventListener('click',async e=>{
+  const ed=e.target.closest('[data-edit]');if(ed){openForm(PRD.find(x=>x.id===ed.dataset.edit));return;}
+  const d=e.target.closest('[data-delp]');if(d){const p=PRD.find(x=>x.id===d.dataset.delp);if(!confirm('確定刪除「'+p.name+'」？（只想暫時不賣，請改用取消勾選「上架」）'))return;try{await api('mf_admin_delete_product',{pid:p.id});await loadProducts();}catch(er){alert('刪除失敗：'+errTxt(er));}}});
+$('newP').onclick=()=>openForm(null);
+function openForm(p){
+  $('pform').classList.remove('hide');$('pfTitle').textContent=p?'編輯商品':'新增商品';msg($('pErr'),'');
+  $('p-id').value=p?p.id:'';$('p-name').value=p?p.name:'';$('p-sub').value=p?p.subtitle:'';$('p-price').value=p?p.price:'';$('p-unit').value=p?p.unit:'罐';$('p-sort').value=p?p.sort:PRD.length+1;$('p-descr').value=p?p.descr:'';
+  $('p-pb').value=p?p.promo_buy:0;$('p-pf').value=p?p.promo_free:0;$('p-on').checked=p?p.on_shelf:true;$('p-so').checked=p?p.sold_out:false;
+  editImgs=p?imgsOf(p.imgs):[];renderImgs();$('pform').scrollIntoView({behavior:'smooth',block:'start'});}
+function renderImgs(){$('p-imgs').innerHTML=editImgs.map((u,i)=>'<div class="im"><img src="'+esc(u)+'" alt="">'+(i===0?'<em>主圖</em>':'<button type="button" class="mv" data-first="'+i+'" title="設為主圖" aria-label="設為主圖">★</button>')+'<button type="button" data-rm="'+i+'" aria-label="移除">×</button></div>').join('')||'<span class="note">尚未加入照片</span>';}
+$('p-imgs').addEventListener('click',e=>{const r=e.target.closest('[data-rm]'),f=e.target.closest('[data-first]');if(r){editImgs.splice(+r.dataset.rm,1);renderImgs();}if(f){const [x]=editImgs.splice(+f.dataset.first,1);editImgs.unshift(x);renderImgs();}});
+$('p-addurl').onclick=()=>{const u=$('p-url').value.trim();if(!u)return;if(!/\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(u)&&!u.startsWith('data:image/')){msg($('pErr'),'圖片網址必須是圖檔（.jpg / .png / .webp）');return;}if(u.includes('|')){msg($('pErr'),'網址不能含「|」');return;}if(editImgs.length>=6){msg($('pErr'),'最多 6 張');return;}editImgs.push(u);$('p-url').value='';msg($('pErr'),'');renderImgs();};
+function shrink(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=rej;r.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const k=Math.min(1,900/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.82));};im.src=r.result;};r.readAsDataURL(file);});}
+$('p-file').addEventListener('change',async e=>{for(const f of e.target.files){if(editImgs.length>=6){msg($('pErr'),'最多 6 張');break;}try{editImgs.push(await shrink(f));}catch(_){msg($('pErr'),'讀取照片失敗');}}e.target.value='';renderImgs();});
+$('pCancel').onclick=()=>$('pform').classList.add('hide');
+$('pSave').onclick=async()=>{
+  const name=$('p-name').value.trim(),price=parseInt($('p-price').value,10);
+  if(!name)return msg($('pErr'),'請填商品名稱');if(!(price>=0))return msg($('pErr'),'請填正確的單價');
+  const pb=parseInt($('p-pb').value,10)||0,pf=parseInt($('p-pf').value,10)||0;if((pb>0)!==(pf>0))return msg($('pErr'),'活動請兩欄都填（例：買 4 送 1），或兩欄都填 0');
+  const p={id:$('p-id').value||null,name,subtitle:$('p-sub').value.trim(),price,unit:$('p-unit').value.trim()||'罐',descr:$('p-descr').value.trim(),imgs:editImgs.join('|'),on_shelf:$('p-on').checked,sold_out:$('p-so').checked,sort:parseInt($('p-sort').value,10)||0,promo_buy:pb,promo_free:pf};
+  const b=$('pSave');b.disabled=true;try{await api('mf_admin_save_product',{p});$('pform').classList.add('hide');await loadProducts();}catch(er){msg($('pErr'),'儲存失敗：'+errTxt(er));}b.disabled=false;};
+
+/* 設定 */
+async function loadSettings(){try{const rows=await mfGet('mf_settings?select=*'),S={};rows.forEach(r=>S[r.key]=r.value);
+  $('s-fee').value=S.ship_fee??0;$('s-free').value=S.free_over??0;$('s-stores').value=(S.stores||[]).join('\n');$('s-contact').value=S.contact||'';$('s-notice').value=S.notice||'';}catch(e){}}
+$('sSave').onclick=async()=>{const s={ship_fee:Math.max(0,parseInt($('s-fee').value,10)||0),free_over:Math.max(0,parseInt($('s-free').value,10)||0),stores:$('s-stores').value.split('\n').map(x=>x.trim()).filter(Boolean),contact:$('s-contact').value.trim(),notice:$('s-notice').value.trim()};
+  try{await api('mf_admin_save_settings',{s});msg($('sMsg'),'已儲存，前台重新整理後生效。',true);}catch(e){msg($('sMsg'),'儲存失敗：'+errTxt(e));}};
+$('cSave').onclick=async()=>{const a=$('c-new').value,b=$('c-new2').value;if(a.length<6)return msg($('cMsg'),'新通關碼至少 6 碼');if(a!==b)return msg($('cMsg'),'兩次輸入不一致');
+  try{await api('mf_admin_change_code',{newcode:a});CODE=a;try{sessionStorage.setItem('mf_code',a);}catch(_){}$('c-new').value=$('c-new2').value='';msg($('cMsg'),'通關碼已更改，下次登入請用新的。',true);}catch(e){msg($('cMsg'),'更改失敗：'+errTxt(e));}};
+</script>
+</body>
+</html>
