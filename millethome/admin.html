@@ -157,6 +157,7 @@ table.it td.n,table.it th.n{text-align:right}
         <div class="g2"><div><label class="l" for="s-fee">宅配運費（NT$，0 ＝ 免運費）</label><input class="in" id="s-fee" type="number" min="0"></div><div><label class="l" for="s-free">滿多少免運（NT$，0 ＝ 無免運門檻）</label><input class="in" id="s-free" type="number" min="0"></div></div>
         <div style="margin-top:12px"><label class="l" for="s-stores">可自取的門市（一行一間）</label><textarea class="in" id="s-stores" rows="4"></textarea></div>
         <div style="margin-top:12px"><label class="l" for="s-contact">顧客聯絡方式（顯示在下單完成頁與常見問題，例：電話或 LINE）</label><input class="in" id="s-contact"></div>
+        <div style="margin-top:12px"><label class="l" for="s-bank">轉帳匯款資訊（顧客選「轉帳匯款」時顯示；可換行，例：銀行名稱／代碼／帳號／戶名）</label><textarea class="in" id="s-bank" rows="3"></textarea></div>
         <div style="margin-top:12px"><label class="l" for="s-notice">首頁公告（購買區上方的橘黃色橫幅；留空 ＝ 不顯示）</label><input class="in" id="s-notice" placeholder="例：10/31 前下單，11/5 前出貨"></div>
         <div id="sMsg" class="hide" style="margin-top:12px"></div>
         <button class="btn g" id="sSave" type="button" style="margin-top:14px">儲存設定</button>
@@ -216,7 +217,7 @@ function renderOrders(){
   $('olist').innerHTML=L.length?L.map(o=>{const si=STS.indexOf(o.status);
     const rows=o.items.map(i=>'<tr><td>'+esc(i.name)+'</td><td class="n">NT$ '+money(i.price)+'</td><td class="n">'+i.qty+(i.free?' ＋贈 '+i.free:'')+'</td><td class="n">NT$ '+money(i.price*i.qty)+'</td></tr>').join('');
     return '<div class="ord'+(o.status==='新訂單'?' new':'')+'" id="o'+o.id+'"><div class="ohead" data-open="'+o.id+'"><div><div class="no">'+esc(o.order_no)+'</div><div class="tm">'+taipei(o.created_at)+'</div></div><div><b>'+esc(o.name)+'</b><div class="tm">'+esc(o.delivery)+'・'+esc(o.pay)+'</div></div><span class="st s'+si+'">'+esc(o.status)+'</span><span class="tt">NT$ '+money(o.total)+'</span></div>'
-    +'<div class="obody"><dl><dt>電話</dt><dd>'+esc(o.tel)+'</dd><dt>取貨方式</dt><dd>'+esc(o.delivery)+(o.addr?'｜'+esc(o.addr):'')+'</dd><dt>付款方式</dt><dd>'+esc(o.pay)+'</dd>'+(o.note?'<dt>顧客備註</dt><dd>'+esc(o.note)+'</dd>':'')+'</dl>'
+    +'<div class="obody"><dl><dt>電話</dt><dd>'+esc(o.tel)+'</dd><dt>取貨方式</dt><dd>'+esc(o.delivery)+(o.addr?'｜'+esc(o.addr):'')+'</dd><dt>付款方式</dt><dd>'+esc(o.pay)+(o.pay==='轉帳匯款'?'　<b style="color:var(--red)">末5碼：'+(o.last5?esc(o.last5):'未填')+'</b>':'')+'</dd>'+(o.note?'<dt>顧客備註</dt><dd>'+esc(o.note)+'</dd>':'')+'</dl>'
     +'<table class="it"><thead><tr><th>品項</th><th class="n">單價</th><th class="n">數量</th><th class="n">小計</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="3" class="n">運費</td><td class="n">NT$ '+money(o.ship)+'</td></tr><tr><td colspan="3" class="n"><b>合計</b></td><td class="n"><b>NT$ '+money(o.total)+'</b></td></tr></tfoot></table>'
     +'<div class="oact"><div class="fld"><label class="l" for="st'+o.id+'">訂單狀態</label><select class="in" id="st'+o.id+'">'+STS.map(s=>'<option'+(s===o.status?' selected':'')+'>'+s+'</option>').join('')+'</select></div><div class="fld"><label class="l" for="an'+o.id+'">內部備註（只有後台看得到）</label><input class="in" id="an'+o.id+'" value="'+esc(o.admin_note||'')+'"></div><button class="btn g sm" data-saveo="'+o.id+'">儲存</button><button class="btn o sm" data-delo="'+o.id+'" style="color:var(--red)">刪除</button></div></div></div>';}).join(''):'<div class="card note" style="text-align:center">沒有符合的訂單。</div>';
 }
@@ -228,9 +229,9 @@ $('olist').addEventListener('click',async e=>{
 $('reload').onclick=loadOrders;setInterval(()=>{if(CODE&&!$('pane-orders').classList.contains('hide'))loadOrders();},60000);
 $('csv').onclick=()=>{
   const q=$('q').value.trim().toLowerCase(),L=ORD.filter(o=>(FIL==='全部'||o.status===FIL)&&(!q||(o.order_no+o.name+o.tel).toLowerCase().includes(q)));
-  const H=['訂單編號','下單時間','狀態','姓名','電話','取貨方式','地址','付款方式','品項明細','商品小計','運費','合計','顧客備註','內部備註'];
+  const H=['訂單編號','下單時間','狀態','姓名','電話','取貨方式','地址','付款方式','匯款末5碼','品項明細','商品小計','運費','合計','顧客備註','內部備註'];
   const c=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const rows=L.map(o=>[o.order_no,new Date(o.created_at).toLocaleString('sv-SE',{timeZone:'Asia/Taipei'}),o.status,o.name,"'"+o.tel,o.delivery,o.addr,o.pay,o.items.map(i=>i.name+' × '+i.qty+(i.free?'＋贈'+i.free:'')).join('；'),o.subtotal,o.ship,o.total,o.note,o.admin_note]);
+  const rows=L.map(o=>[o.order_no,new Date(o.created_at).toLocaleString('sv-SE',{timeZone:'Asia/Taipei'}),o.status,o.name,"'"+o.tel,o.delivery,o.addr,o.pay,o.last5||'',o.items.map(i=>i.name+' × '+i.qty+(i.free?'＋贈'+i.free:'')).join('；'),o.subtotal,o.ship,o.total,o.note,o.admin_note]);
   const blob=new Blob(['﻿'+[H].concat(rows).map(r=>r.map(c).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='米樂家果仁辣醬訂單_'+dayKey(new Date())+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);};
 
@@ -266,8 +267,8 @@ $('pSave').onclick=async()=>{
 
 /* 設定 */
 async function loadSettings(){try{const rows=await mfGet('mf_settings?select=*'),S={};rows.forEach(r=>S[r.key]=r.value);
-  $('s-fee').value=S.ship_fee??0;$('s-free').value=S.free_over??0;$('s-stores').value=(S.stores||[]).join('\n');$('s-contact').value=S.contact||'';$('s-notice').value=S.notice||'';}catch(e){}}
-$('sSave').onclick=async()=>{const s={ship_fee:Math.max(0,parseInt($('s-fee').value,10)||0),free_over:Math.max(0,parseInt($('s-free').value,10)||0),stores:$('s-stores').value.split('\n').map(x=>x.trim()).filter(Boolean),contact:$('s-contact').value.trim(),notice:$('s-notice').value.trim()};
+  $('s-fee').value=S.ship_fee??0;$('s-free').value=S.free_over??0;$('s-stores').value=(S.stores||[]).join('\n');$('s-contact').value=S.contact||'';$('s-notice').value=S.notice||'';$('s-bank').value=S.bank||'';}catch(e){}}
+$('sSave').onclick=async()=>{const s={ship_fee:Math.max(0,parseInt($('s-fee').value,10)||0),free_over:Math.max(0,parseInt($('s-free').value,10)||0),stores:$('s-stores').value.split('\n').map(x=>x.trim()).filter(Boolean),contact:$('s-contact').value.trim(),notice:$('s-notice').value.trim(),bank:$('s-bank').value.trim()};
   try{await api('mf_admin_save_settings',{s});msg($('sMsg'),'已儲存，前台重新整理後生效。',true);}catch(e){msg($('sMsg'),'儲存失敗：'+errTxt(e));}};
 $('cSave').onclick=async()=>{const a=$('c-new').value,b=$('c-new2').value;if(a.length<6)return msg($('cMsg'),'新通關碼至少 6 碼');if(a!==b)return msg($('cMsg'),'兩次輸入不一致');
   try{await api('mf_admin_change_code',{newcode:a});CODE=a;try{sessionStorage.setItem('mf_code',a);}catch(_){}$('c-new').value=$('c-new2').value='';msg($('cMsg'),'通關碼已更改，下次登入請用新的。',true);}catch(e){msg($('cMsg'),'更改失敗：'+errTxt(e));}};

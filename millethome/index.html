@@ -14,6 +14,7 @@
 --green:#7F9E44;--green-d:#5F7A30;--green-l:#E8EFD8;--orange:#EF8A2A;--red:#C63D1F;--red-d:#A83219;--yellow:#F3B329;--plum:#6E4763;--brown:#9C6B45;--line:#E6DDC9;
 --serif:'Noto Serif TC','Songti TC',serif;--sans:'Noto Sans TC','Microsoft JhengHei','PingFang TC',system-ui,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:76px}
 body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.7}
 img{max-width:100%;display:block}
@@ -161,9 +162,27 @@ textarea.in{min-height:84px;padding:12px 14px;resize:vertical}
 .seg label:has(input:checked){border-color:var(--green);background:var(--green-l)}
 .seg label:has(input:focus-visible){outline:3px solid var(--orange);outline-offset:2px}
 .msg{border-radius:12px;padding:12px 14px;font-size:15px}
+.bank{background:#FFF6E5;border:1.5px solid #F0D9A8;color:#5A3A00;border-radius:12px;padding:12px 14px;font-size:15px;line-height:1.7;white-space:pre-line}
+.bank b{display:block;color:var(--red-d);margin-bottom:2px}
 .msg.err{background:#FBE9E4;color:#8A2B15;border:1px solid #F1C2B6}
 .done{background:var(--green-l);border:2px solid var(--green);border-radius:18px;padding:20px;color:var(--green-d)}
 .done b.no{font-size:22px;color:var(--charcoal);letter-spacing:.04em}
+.odet{background:#fff;border:1px solid #CBDDA5;border-radius:12px;padding:12px 14px;margin:10px 0;color:var(--ink);font-size:15px;line-height:1.75;white-space:pre-line;word-break:break-all}
+.copyrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.copyok{color:var(--green-d);font-weight:700;font-size:14px;align-self:center}
+/* 查詢訂單 */
+.lookup{max-width:720px;margin:0 auto;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:22px}
+.lookup form{display:flex;gap:10px;flex-wrap:wrap}
+.lookup form .in{flex:1;min-width:200px}
+.lres{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.lo{border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+.lo .lh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;margin-bottom:6px}
+.lo .lh b{font-size:17px;color:var(--charcoal)}
+.lo .lh .tm{font-size:13px;color:var(--ink2)}
+.lo .st{display:inline-block;border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700;background:var(--cream2);color:var(--ink2)}
+.lo .st.s0{background:#FBE0D8;color:#A83219}.lo .st.s1{background:#FFF0CC;color:#7A4B00}.lo .st.s2{background:#DDEAF7;color:#1F4F7C}.lo .st.s3{background:var(--green-l);color:var(--green-d)}
+.lo .lb2{font-size:15px;color:var(--ink);white-space:pre-line;line-height:1.7}
+.lo .tt{font-family:var(--serif);font-weight:700;color:var(--red);font-size:18px}
 .fine{font-size:13.5px;color:var(--ink2);line-height:1.6}
 
 /* 關於 */
@@ -203,7 +222,7 @@ footer .bg img{margin:0;height:56px}
 
 <nav class="nav"><div class="nin">
   <a class="brand" href="#top"><img src="assets/img/logo-mark.png" alt="">米樂家食材</a>
-  <a class="lk" href="#feature">產品特色</a><a class="lk" href="#eat">怎麼吃</a><a class="lk" href="#spec">成分規格</a><a class="lk" href="#about">關於米樂家</a>
+  <a class="lk" href="#feature">產品特色</a><a class="lk" href="#eat">怎麼吃</a><a class="lk" href="#spec">成分規格</a><a class="lk" href="#lookup">查詢訂單</a><a class="lk" href="#about">關於米樂家</a>
   <a class="cartbtn" href="#buy" id="navCart">立即購買 <span class="n" id="navN">0</span></a>
 </div></nav>
 
@@ -279,6 +298,8 @@ footer .bg img{margin:0;height:56px}
         <div class="fld" id="addrBox"><label for="f-addr">收件地址</label><input class="in" id="f-addr" autocomplete="street-address" maxlength="200" placeholder="縣市、鄉鎮、路街、門牌"></div>
         <div class="fld" id="storeBox" hidden><label for="f-store">取貨門市</label><select class="in" id="f-store"></select></div>
         <div class="fld"><span class="lb">付款方式</span><div class="seg" id="segPay"></div></div>
+        <div class="bank" id="bankBox" hidden></div>
+        <div class="fld" id="last5Box" hidden><label for="f-last5">匯款帳號末 5 碼（選填）</label><input class="in" id="f-last5" inputmode="numeric" pattern="[0-9]*" maxlength="5" placeholder="已匯款請填，之後匯款也可再告知"></div>
         <div class="fld"><label for="f-note">備註（選填）</label><textarea class="in" id="f-note" maxlength="300" placeholder="例：希望到貨時段、送禮留言"></textarea></div>
         <button class="btn btn-red" type="submit" id="subBtn">送出訂單</button>
         <div class="fine">訂購資料僅供本次出貨與聯繫使用。</div>
@@ -287,10 +308,22 @@ footer .bg img{margin:0;height:56px}
         <div style="font-weight:700;font-size:20px;margin-bottom:6px">訂單已送出，謝謝您！</div>
         <div>訂單編號 <b class="no" id="doneNo"></b></div>
         <div id="doneAmt" style="margin:6px 0"></div>
+        <div class="odet" id="doneDet"></div>
         <div id="donePay" class="fine" style="color:inherit"></div>
-        <button class="btn btn-line sm" type="button" id="again" style="margin-top:12px">再逛一次</button>
+        <div class="copyrow"><button class="btn btn-red sm" type="button" id="copyBtn">複製訂單內容</button><button class="btn btn-line sm" type="button" id="again">再逛一次</button><span class="copyok" id="copyOk" hidden>已複製 ✓</span></div>
+        <div class="fine" style="margin-top:8px">建議截圖或複製保存；之後也可在「查詢訂單」用您留的電話查詢。</div>
       </div>
     </aside>
+  </div>
+</div></section>
+
+<section class="sec tint" id="lookup"><div class="wrap">
+  <span class="lbl">MY ORDERS</span><h2>查詢訂單</h2>
+  <p class="sub">輸入下單時留的電話，查看訂單內容與目前狀態。</p>
+  <div class="lookup">
+    <form id="lkForm" novalidate><label class="sr" for="lk-tel">電話</label><input class="in" id="lk-tel" type="tel" inputmode="tel" placeholder="09xx-xxx-xxx" maxlength="20"><button class="btn btn-red" type="submit" id="lkBtn">查詢</button></form>
+    <div class="msg err" id="lkErr" hidden style="margin-top:12px"></div>
+    <div class="lres" id="lkRes"></div>
   </div>
 </div></section>
 
@@ -327,7 +360,7 @@ footer .bg img{margin:0;height:56px}
 const FALLBACK=[{id:'fallback',name:'滿福果仁辣醬',subtitle:'純素・香麻小辣・淨重 250 公克',price:350,unit:'罐',
  descr:'純素、香麻小辣，淨重 250 公克。內含松子、腰果、杏仁、花生、白芝麻、葵瓜子，拌麵、拌飯、拌豆腐、涼青菜、火鍋沾醬都合適。\n過敏原：含堅果類、花生、芝麻、大豆、含麩質穀物，詳見瓶身標示。',
  imgs:'assets/img/jar-1.jpg|assets/img/jar-2.jpg|assets/img/jar-3.jpg|assets/img/jar-4.jpg|assets/img/team.jpg',promo_buy:0,promo_free:0,sold_out:false}];
-let PRODUCTS=[],SET={ship_fee:100,free_over:1000,stores:['苑裡野草','中苗門市','竹南金春發'],contact:'',notice:''},OFFLINE=false;
+let PRODUCTS=[],SET={ship_fee:100,free_over:1000,stores:['苑裡野草','中苗門市','竹南金春發'],contact:'',notice:'',bank:''},OFFLINE=false;
 let cart={};try{cart=JSON.parse(localStorage.getItem('mf_cart')||'{}')||{};}catch(e){}
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -348,7 +381,7 @@ async function load(){
   const p0=PRODUCTS[0];if(p0)$('heroPrice').innerHTML='NT$ '+money(p0.price)+'<small>／'+esc(p0.unit)+'</small>';
   if(SET.notice){$('notice').textContent=SET.notice;$('notice').hidden=false;}
   $('f-store').innerHTML=(SET.stores||[]).map(s=>'<option>'+esc(s)+'</option>').join('');
-  renderProds();renderCart();renderFaq();
+  renderProds();renderCart();renderFaq();renderBank();
 }
 function renderProds(){
   $('prods').innerHTML=PRODUCTS.map(p=>{const im=imgsOf(p),id=esc(p.id);
@@ -381,13 +414,16 @@ function renderPay(){
   const opts=deliv()==='宅配'?['貨到付款','轉帳匯款']:['門市付款','轉帳匯款'];
   const prev=(document.querySelector('input[name=pay]:checked')||{}).value,cur=opts.includes(prev)?prev:opts[0];
   $('segPay').innerHTML=opts.map(o=>'<label><input type="radio" name="pay" value="'+o+'"'+(cur===o?' checked':'')+'><span>'+o+'</span></label>').join('');
+  renderBank();
 }
+function renderBank(){const b=$('bankBox'),on=(document.querySelector('input[name=pay]:checked')||{}).value==='轉帳匯款'&&SET.bank;const tr=(document.querySelector('input[name=pay]:checked')||{}).value==='轉帳匯款';$('last5Box').hidden=!tr;b.hidden=!on;if(on)b.innerHTML='<b>轉帳匯款資訊</b>'+esc(SET.bank)+'\n匯款後請在下方填寫帳號末 5 碼（之後匯款也可再告知），核對後出貨。';}
+$('segPay').addEventListener('change',renderBank);
 function renderFaq(){
   const ship=SET.ship_fee>0?('宅配運費 NT$ '+money(SET.ship_fee)+(SET.free_over>0?'，商品滿 NT$ '+money(SET.free_over)+' 免運。':'。')):'宅配免運費。';
   const ct=SET.contact?'<br>聯絡方式：'+esc(SET.contact):'';
   const Q=[['運費怎麼算？',ship+'選擇門市自取則不收運費。'],
    ['可以去門市自取嗎？','可以。下單時選「門市自取」並選擇取貨門市（'+esc((SET.stores||[]).join('、'))+'），我們備貨後會與您聯繫取貨時間。'],
-   ['怎麼付款？','宅配可選貨到付款或轉帳匯款；門市自取可到店付款或轉帳匯款。選擇轉帳的話，送出訂單後米樂家會與您聯繫匯款資訊。'],
+   ['怎麼付款？','宅配可選貨到付款或轉帳匯款；門市自取可到店付款或轉帳匯款。選擇轉帳的話，'+(SET.bank?'匯款資訊：'+esc(SET.bank)+'，匯款後請告知帳號末 5 碼。':'送出訂單後米樂家會與您聯繫匯款資訊。')],
    ['有哪些過敏原？','本產品含堅果類、花生、芝麻、大豆、含麩質穀物，對這些過敏的朋友請勿食用，完整標示請見瓶身。'],
    ['需要大量訂購或批發嗎？','餐廳、小吃攤、團購與大量訂購歡迎直接聯繫米樂家，我們會依數量與需求報價。'+ct]];
   $('faqBox').innerHTML=Q.map(q=>'<details><summary>'+q[0]+'</summary><p>'+q[1]+'</p></details>').join('');
@@ -406,20 +442,53 @@ $('form').addEventListener('submit',async e=>{
   if(!g('f-name'))return showErr('請填寫收件人姓名'),$('f-name').focus();
   if(!/^[0-9+() -]{8,20}$/.test(g('f-tel')))return showErr('請填寫正確的聯絡電話'),$('f-tel').focus();
   if(d==='宅配'&&g('f-addr').length<5)return showErr('請填寫完整的收件地址'),$('f-addr').focus();
+  const last5=g('f-last5').replace(/\D/g,'');if(document.querySelector('input[name=pay]:checked').value==='轉帳匯款'&&last5&&last5.length!==5)return showErr('匯款帳號末 5 碼請填 5 個數字'),$('f-last5').focus();
   const items=Object.keys(cart).filter(prod).map(id=>({id:id,qty:cart[id]}));
   const btn=$('subBtn');btn.disabled=true;btn.textContent='送出中…';
   try{
-    const r=await mfRpc('mf_place_order',{p:{name:g('f-name'),tel:g('f-tel'),delivery:d==='宅配'?'宅配':$('f-store').value,pay:document.querySelector('input[name=pay]:checked').value,addr:g('f-addr'),note:g('f-note'),items:items}});
+    const payV=document.querySelector('input[name=pay]:checked').value,delivV=d==='宅配'?'宅配':$('f-store').value;
+    const r=await mfRpc('mf_place_order',{p:{name:g('f-name'),tel:g('f-tel'),delivery:delivV,pay:payV,addr:g('f-addr'),note:g('f-note'),last5:payV==='轉帳匯款'?last5:'',items:items}});
+    const snap={order_no:r.order_no,created_at:new Date().toISOString(),items:items.map(x=>{const p=prod(x.id);return {name:p.name,price:p.price,unit:p.unit,qty:x.qty,free:freeOf(p,x.qty)};}),subtotal:r.subtotal,ship:r.ship,total:r.total,delivery:delivV,pay:payV,addr:d==='宅配'?g('f-addr'):'',name:g('f-name'),tel:g('f-tel'),note:g('f-note'),last5:payV==='轉帳匯款'?last5:''};
+    LAST=orderText(snap,true);$('doneDet').textContent=LAST;
     cart={};save();
     $('doneNo').textContent=r.order_no;
     $('doneAmt').textContent='應付金額 NT$ '+money(r.total)+(r.ship?'（含運費 NT$ '+money(r.ship)+'）':'');
     const pay=document.querySelector('input[name=pay]:checked').value;
-    $('donePay').textContent=(pay==='轉帳匯款'?'請留意米樂家與您聯繫的匯款資訊。':pay==='貨到付款'?'收到商品時再付款即可。':'取貨時於門市付款。')+'我們會以您留的電話與您聯繫。'+(SET.contact?'有任何問題也可以聯絡：'+SET.contact:'');
+    $('donePay').textContent=(pay==='轉帳匯款'?(SET.bank?'請匯款至：'+SET.bank+(last5?'，已收到您的帳號末 5 碼，核對後出貨。':'，並告知帳號末 5 碼，核對後出貨。'):'請留意米樂家與您聯繫的匯款資訊。'):pay==='貨到付款'?'收到商品時再付款即可。':'取貨時於門市付款。')+'我們會以您留的電話與您聯繫。'+(SET.contact?'有任何問題也可以聯絡：'+SET.contact:'');
     $('form').reset();$('form').hidden=true;$('sum').innerHTML='';$('cartList').innerHTML='';$('done').hidden=false;renderCart();$('form').hidden=true;
     $('done').scrollIntoView({behavior:'smooth',block:'nearest'});
   }catch(err){showErr(/[一-鿿]/.test(err.message)?err.message:'送出失敗，請稍後再試。');}
   btn.disabled=false;btn.textContent='送出訂單';
 });
+/* 訂單文字（給完成頁顯示、複製、查詢共用） */
+const STI={'新訂單':0,'已確認':1,'已出貨':2,'已完成':3,'已取消':4};
+const fmtTime=d=>new Date(d).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+function orderText(o,full){
+  const L=['米樂家食材・滿福果仁辣醬 訂單','訂單編號：'+o.order_no,'下單時間：'+fmtTime(o.created_at)];
+  if(o.status)L.push('訂單狀態：'+o.status);
+  L.push('');
+  o.items.forEach(i=>L.push('・'+i.name+'　NT$ '+money(i.price)+' × '+i.qty+' '+(i.unit||'')+(i.free?'（＋贈 '+i.free+' '+(i.unit||'')+'）':'')));
+  L.push('商品小計：NT$ '+money(o.subtotal),'運費：'+(o.ship?'NT$ '+money(o.ship):'免運'),'合計：NT$ '+money(o.total),'');
+  L.push('取貨方式：'+(o.delivery==='宅配'?'宅配到府':'門市自取（'+o.delivery+'）'));
+  if(full&&o.addr)L.push('收件地址：'+o.addr);
+  L.push('付款方式：'+o.pay);
+  if(full&&o.name)L.push('收件人：'+o.name+'　'+o.tel);
+  if(o.pay==='轉帳匯款')L.push('匯款帳號末 5 碼：'+(o.last5||'（尚未填寫）'));
+  if(o.note)L.push('備註：'+o.note);
+  if(o.pay==='轉帳匯款'&&SET.bank)L.push('','匯款資訊：'+SET.bank,o.last5?'':'匯款後請告知帳號末 5 碼');
+  return L.join('\n');}
+let LAST='';
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true;}catch(e){try{const ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;}catch(_){return false;}}}
+$('copyBtn').onclick=async()=>{const ok=await copyText(LAST);const k=$('copyOk');k.textContent=ok?'已複製 ✓':'複製失敗，請長按文字手動複製';k.hidden=false;setTimeout(()=>k.hidden=true,2500);};
+$('lkForm').addEventListener('submit',async e=>{e.preventDefault();const t=$('lk-tel').value.trim(),er=$('lkErr'),res=$('lkRes');er.hidden=true;res.innerHTML='';
+  if(t.replace(/\D/g,'').length<8){er.textContent='請輸入完整電話號碼';er.hidden=false;return;}
+  const b=$('lkBtn');b.disabled=true;b.textContent='查詢中…';
+  try{const rows=await mfRpc('mf_lookup_orders',{tel_in:t});
+    res.innerHTML=rows.length?rows.map(o=>'<div class="lo"><div class="lh"><div><b>'+esc(o.order_no)+'</b><div class="tm">'+esc(fmtTime(o.created_at))+'・'+esc(o.name||'')+'</div></div><span class="st s'+(STI[o.status]??4)+'">'+esc(o.status)+'</span></div><div class="lb2">'+esc(o.items.map(i=>i.name+' × '+i.qty+(i.free?'（＋贈 '+i.free+'）':'')).join('\n'))+'\n'+esc(o.delivery==='宅配'?'宅配到府':'門市自取（'+o.delivery+'）')+'・'+esc(o.pay)+'</div><div class="lh" style="margin:8px 0 0"><span class="tt">NT$ '+money(o.total)+'</span><button type="button" class="btn btn-line sm" data-copy="'+esc(o.order_no)+'">複製</button></div></div>').join('')
+      :'<div class="empty">找不到這支電話的訂單，請確認號碼是否與下單時相同。</div>';
+    res.querySelectorAll('[data-copy]').forEach(bt=>bt.onclick=async()=>{const o=rows.find(x=>x.order_no===bt.dataset.copy);const ok=await copyText(orderText(o,false));bt.textContent=ok?'已複製 ✓':'複製失敗';setTimeout(()=>bt.textContent='複製',2000);});
+  }catch(err){er.textContent=/[\u4e00-\u9fff]/.test(err.message)?err.message:'查詢失敗，請稍後再試。';er.hidden=false;}
+  b.disabled=false;b.textContent='查詢';});
 renderPay();load();
 </script>
 </body>
