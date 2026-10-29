@@ -1,0 +1,451 @@
+<title>3D 成果檢視台</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 上方是佔滿寬度的 3D 舞台，下方是工作檯（載入、數據、驗收清單）；桌機改為左舞台右檯面 */
+:root {
+  --bg: #eef0ec;
+  --surface: #f9faf7;
+  --ink: #1c211d;
+  --muted: #5d665f;
+  --line: #d3d8d1;
+  --accent: #2f6b4f;
+  --accent-ink: #ffffff;
+  --stage: #dfe3dc;
+  --grid: #b9c1b8;
+  --warn: #9a5b12;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141815; --surface: #1c211d; --ink: #e6ebe4; --muted: #9aa59c; --line: #2f3731;
+    --accent: #7cc4a0; --accent-ink: #0e1a13; --stage: #0f1210; --grid: #2c342e; --warn: #e2a65a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141815; --surface: #1c211d; --ink: #e6ebe4; --muted: #9aa59c; --line: #2f3731;
+  --accent: #7cc4a0; --accent-ink: #0e1a13; --stage: #0f1210; --grid: #2c342e; --warn: #e2a65a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 32px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+h1 { font-size: 1.5rem; font-weight: 900; margin: 0; letter-spacing: 0.02em; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.main { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .main { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
+
+.stage {
+  position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 10px;
+  overflow: hidden; aspect-ratio: 4 / 3; max-width: 100%; min-height: 300px;
+}
+@media (min-width: 900px) { .stage { aspect-ratio: auto; height: min(72vh, 680px); } }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.stage.drag { outline: 3px dashed var(--accent); outline-offset: -8px; }
+.hud {
+  position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 12px; pointer-events: none;
+}
+.chip { background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+.chip.ok { color: var(--accent); }
+.chip.slow { color: var(--warn); }
+.tools {
+  position: absolute; right: 10px; bottom: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+}
+.loading {
+  position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--stage) 70%, transparent);
+  font-weight: 700;
+}
+
+button, .btn {
+  font: inherit; font-size: 0.85rem; font-weight: 500; cursor: pointer; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 6px 12px; min-height: 36px;
+}
+button:hover, .btn:hover { border-color: var(--accent); }
+button:focus-visible, .btn:focus-within, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+
+.panel { display: grid; gap: 16px; min-width: 0; }
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+h2 { font-size: 0.8rem; letter-spacing: 0.12em; color: var(--muted); margin: 0; font-weight: 700; }
+.drop { display: grid; gap: 8px; }
+.drop .btn { display: inline-flex; align-items: center; justify-content: center; position: relative; }
+.drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.hint { color: var(--muted); font-size: 0.82rem; margin: 0; }
+.formats { display: flex; flex-wrap: wrap; gap: 4px; }
+.formats span { font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; color: var(--muted); }
+
+ul.files { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+ul.files li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 6px; }
+ul.files li:first-child { border-top: 0; padding-top: 0; }
+.fname { font-weight: 500; overflow-wrap: anywhere; }
+.fmeta { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.x { min-height: 28px; padding: 2px 8px; font-size: 0.78rem; }
+.err { color: var(--warn); font-size: 0.85rem; margin: 0; }
+
+ol.check { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+ol.check label { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; align-items: start; cursor: pointer; }
+ol.check input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+ol.check b { font-weight: 700; }
+ol.check small { display: block; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+.progress { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+audio { width: 100%; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>3D 成果檢視台</h1>
+    <p>拖曳或選擇 image-blaster 產出的檔案，手機電腦都能轉看</p>
+  </header>
+
+  <div class="main">
+    <div class="stage" id="stage">
+      <canvas id="c" aria-label="3D 檢視區，可拖曳旋轉、雙指縮放"></canvas>
+      <div class="hud" aria-live="polite">
+        <span class="chip" id="hudName">示範場景</span>
+        <span class="chip" id="hudFps">— fps</span>
+      </div>
+      <div class="tools">
+        <button id="btnSpin" aria-pressed="true">自動旋轉</button>
+        <button id="btnWire" aria-pressed="false">線框</button>
+        <button id="btnFlip">上下翻轉</button>
+        <button id="btnReset">重設視角</button>
+      </div>
+      <div class="loading" id="loading" hidden>載入中…</div>
+    </div>
+
+    <div class="panel">
+      <section class="card">
+        <h2>載入檔案</h2>
+        <div class="drop">
+          <label class="btn primary">選擇檔案（可多選）
+            <input id="file" type="file" multiple accept=".glb,.gltf,.obj,.spz,.ply,.splat,.ksplat,.mp3,.wav,.ogg,audio/*">
+          </label>
+          <p class="hint">也可以直接把檔案拖到左邊的 3D 區。檔案只在你的瀏覽器裡開，不會上傳。</p>
+          <div class="formats" aria-label="支援格式">
+            <span>.glb</span><span>.obj</span><span>.spz</span><span>.ply</span><span>.splat</span><span>.mp3</span>
+          </div>
+        </div>
+        <ul class="files" id="files"></ul>
+        <p class="err" id="err" hidden></p>
+        <button id="btnClear" hidden>清除全部，回到示範場景</button>
+      </section>
+
+      <section class="card" id="audioCard" hidden>
+        <h2>音效</h2>
+        <div id="audios" style="display:grid;gap:8px"></div>
+      </section>
+
+      <section class="card">
+        <h2>驗收清單</h2>
+        <ol class="check" id="check">
+          <li><label><input type="checkbox" id="ck1"><span><b>正面像原圖</b><small>先轉回原照片的角度比對</small></span></label></li>
+          <li><label><input type="checkbox" id="ck2"><span><b>背面與死角沒破洞</b><small>繞到後面、往上看天花板，這裡最容易糊</small></span></label></li>
+          <li><label><input type="checkbox" id="ck3"><span><b>地板牆面接縫平整</b><small>開「線框」看有沒有扭曲或浮起</small></span></label></li>
+          <li><label><input type="checkbox" id="ck4"><span><b>物件比例與材質合理</b><small>對照檔案清單裡的尺寸，桌椅大小要對得上</small></span></label></li>
+          <li><label><input type="checkbox" id="ck5"><span><b>手機順暢</b><small>左上 fps 維持 30 以上；太卡就降低 face-count</small></span></label></li>
+        </ol>
+        <div class="progress" id="progress">0 / 5 通過</div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.178.0/examples/jsm/",
+  "@sparkjsdev/spark": "https://cdn.jsdelivr.net/npm/@sparkjsdev/spark@0.1.10/dist/spark.module.js"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+
+const $ = (id) => document.getElementById(id);
+const stage = $("stage"), canvas = $("c");
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, 1, 0.01, 2000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.2;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445544, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+sun.position.set(3, 6, 4);
+scene.add(sun);
+
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+let grid;
+function applyTheme() {
+  scene.background = new THREE.Color(css("--stage") || "#dfe3dc");
+  if (grid) scene.remove(grid);
+  const g = new THREE.Color(css("--grid") || "#b9c1b8");
+  grid = new THREE.GridHelper(20, 40, g, g);
+  grid.material.transparent = true;
+  grid.material.opacity = 0.6;
+  scene.add(grid);
+}
+applyTheme();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+// ---------- 示範場景：一張低面數椅子，讓還沒有檔案時也能試操作 ----------
+function buildDemo() {
+  const g = new THREE.Group();
+  const wood = new THREE.MeshStandardMaterial({ color: 0xa0704a, roughness: 0.7 });
+  const seat = new THREE.MeshStandardMaterial({ color: 0x2f6b4f, roughness: 0.9 });
+  const box = (w, h, d, m, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); g.add(b); };
+  for (const [x, z] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) box(0.05, 0.45, 0.05, wood, x, 0.225, z);
+  box(0.5, 0.06, 0.5, seat, 0, 0.48, 0);
+  box(0.05, 0.5, 0.05, wood, -0.2, 0.76, -0.2);
+  box(0.05, 0.5, 0.05, wood, 0.2, 0.76, -0.2);
+  box(0.46, 0.22, 0.04, seat, 0, 0.88, -0.2);
+  const table = new THREE.MeshStandardMaterial({ color: 0xd8cfc2, roughness: 0.6 });
+  box(0.9, 0.04, 0.6, table, 1.0, 0.74, 0.1);
+  for (const [x, z] of [[0.6, -0.15], [1.4, -0.15], [0.6, 0.35], [1.4, 0.35]]) box(0.04, 0.72, 0.04, wood, x, 0.36, z);
+  g.userData = { kind: "demo" };
+  return g;
+}
+
+// ---------- 狀態 ----------
+const items = []; // { id, name, size, object, kind, info, audioUrl }
+let demo = buildDemo();
+scene.add(demo);
+let spark = null, sparkMod = null, wire = false;
+
+function fmtBytes(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
+function fmtNum(n) { return n.toLocaleString("zh-TW"); }
+
+function meshStats(obj) {
+  let tris = 0, verts = 0;
+  obj.traverse((o) => {
+    if (o.isMesh && o.geometry) {
+      const geo = o.geometry, pos = geo.attributes.position;
+      if (!pos) return;
+      verts += pos.count;
+      tris += geo.index ? geo.index.count / 3 : pos.count / 3;
+    }
+  });
+  const box = new THREE.Box3().setFromObject(obj);
+  const s = box.getSize(new THREE.Vector3());
+  return { tris: Math.round(tris), verts, size: s };
+}
+
+function frame(objs) {
+  const box = new THREE.Box3();
+  let has = false, onlySplat = true;
+  for (const o of objs) {
+    if (o.userData.kind === "splat") continue;
+    onlySplat = false;
+    const b = new THREE.Box3().setFromObject(o);
+    if (!b.isEmpty()) { box.union(b); has = true; }
+  }
+  if (!has) {
+    // 環境 splat：站在場景中央往前看，最接近「走進去」的體驗
+    camera.position.set(0, 0, 0.6);
+    controls.target.set(0, 0, 0);
+    controls.update();
+    return;
+  }
+  const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
+  const r = Math.max(s.x, s.y, s.z) || 1;
+  controls.target.copy(c);
+  camera.position.set(c.x + r * 1.2, c.y + r * 0.8, c.z + r * 1.6);
+  camera.near = r / 500; camera.far = r * 200; camera.updateProjectionMatrix();
+  controls.update();
+}
+const visibleObjects = () => items.filter((i) => i.object).map((i) => i.object).concat(items.length ? [] : [demo]);
+
+// ---------- 載入 ----------
+async function ensureSpark() {
+  if (!sparkMod) sparkMod = await import("@sparkjsdev/spark");
+  if (!spark) { spark = new sparkMod.SparkRenderer({ renderer }); scene.add(spark); }
+  return sparkMod;
+}
+
+function centerOnFloor(obj) {
+  const box = new THREE.Box3().setFromObject(obj);
+  if (box.isEmpty()) return;
+  const c = box.getCenter(new THREE.Vector3());
+  obj.position.x -= c.x; obj.position.z -= c.z; obj.position.y -= box.min.y;
+}
+
+async function loadFile(file) {
+  const ext = file.name.split(".").pop().toLowerCase();
+  const item = { id: crypto.randomUUID ? crypto.randomUUID() : String(Math.random()), name: file.name, size: file.size, kind: ext };
+  if (["mp3", "wav", "ogg", "m4a"].includes(ext) || file.type.startsWith("audio/")) {
+    item.kind = "audio";
+    item.audioUrl = URL.createObjectURL(file);
+    item.info = "音效";
+    return item;
+  }
+  const buf = await file.arrayBuffer();
+  if (ext === "glb" || ext === "gltf") {
+    const gltf = await new GLTFLoader().parseAsync(buf, "");
+    item.object = gltf.scene;
+  } else if (ext === "obj") {
+    const text = new TextDecoder().decode(buf);
+    const obj = new OBJLoader().parse(text);
+    obj.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshStandardMaterial({ color: 0xc9c4ba, roughness: 0.8 }); });
+    item.object = obj;
+  } else if (["spz", "ply", "splat", "ksplat"].includes(ext)) {
+    const { SplatMesh } = await ensureSpark();
+    const mesh = new SplatMesh({ fileBytes: new Uint8Array(buf), fileName: file.name });
+    await mesh.initialized;
+    mesh.quaternion.set(1, 0, 0, 0); // World Labs 匯出的座標上下顛倒，預設先轉正
+    mesh.userData.kind = "splat";
+    item.object = mesh;
+    item.kind = "splat";
+    const n = mesh.packedSplats?.numSplats ?? mesh.numSplats;
+    item.info = n ? `${fmtNum(n)} 個點（Gaussian splat 場景）` : "Gaussian splat 場景";
+    return item;
+  } else {
+    throw new Error(`不支援 .${ext}，請用 .glb / .obj / .spz / .ply / .mp3`);
+  }
+  item.object.userData.kind = "mesh";
+  centerOnFloor(item.object);
+  const st = meshStats(item.object);
+  item.info = `${fmtNum(st.tris)} 面 · ${fmtNum(st.verts)} 頂點 · 尺寸 ${st.size.x.toFixed(2)} × ${st.size.y.toFixed(2)} × ${st.size.z.toFixed(2)}`;
+  return item;
+}
+
+async function handleFiles(list) {
+  const files = [...list];
+  if (!files.length) return;
+  $("loading").hidden = false;
+  $("err").hidden = true;
+  const errors = [];
+  for (const f of files) {
+    try {
+      const item = await loadFile(f);
+      items.push(item);
+      if (item.object) { applyWire(item.object); scene.add(item.object); }
+    } catch (e) {
+      errors.push(`${f.name}：${e.message || "無法讀取，檔案可能損壞"}`);
+    }
+  }
+  if (items.length && demo.parent) scene.remove(demo);
+  $("loading").hidden = true;
+  if (errors.length) { $("err").textContent = errors.join("\n"); $("err").hidden = false; }
+  render();
+  frame(visibleObjects());
+}
+
+function removeItem(id) {
+  const i = items.findIndex((x) => x.id === id);
+  if (i < 0) return;
+  const [it] = items.splice(i, 1);
+  if (it.object) { scene.remove(it.object); it.object.dispose?.(); }
+  if (it.audioUrl) URL.revokeObjectURL(it.audioUrl);
+  if (!items.length) scene.add(demo);
+  render();
+  frame(visibleObjects());
+}
+
+function render() {
+  const ul = $("files");
+  ul.replaceChildren();
+  for (const it of items) {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="fname"></span><button class="x">移除</button><span class="fmeta"></span>`;
+    li.querySelector(".fname").textContent = it.name;
+    li.querySelector(".fmeta").textContent = `${fmtBytes(it.size)} · ${it.info || ""}`;
+    li.querySelector("button").addEventListener("click", () => removeItem(it.id));
+    ul.append(li);
+  }
+  $("btnClear").hidden = !items.length;
+  const audios = items.filter((i) => i.kind === "audio");
+  $("audioCard").hidden = !audios.length;
+  const box = $("audios");
+  box.replaceChildren();
+  for (const a of audios) {
+    const wrap = document.createElement("div");
+    const cap = document.createElement("div");
+    cap.className = "hint"; cap.textContent = a.name;
+    const el = document.createElement("audio");
+    el.controls = true; el.loop = true; el.src = a.audioUrl;
+    el.addEventListener("error", () => { cap.textContent = `${a.name}（這個瀏覽器無法在頁面內播放，請改用電腦播放器）`; });
+    wrap.append(cap, el); box.append(wrap);
+  }
+  const shown = items.filter((i) => i.object);
+  $("hudName").textContent = shown.length ? (shown.length === 1 ? shown[0].name : `${shown.length} 個檔案`) : "示範場景";
+}
+
+// ---------- 工具列 ----------
+function applyWire(obj) {
+  obj.traverse((o) => { if (o.isMesh && o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { if ("wireframe" in m) m.wireframe = wire; }); });
+}
+$("btnSpin").addEventListener("click", (e) => { controls.autoRotate = !controls.autoRotate; e.currentTarget.setAttribute("aria-pressed", controls.autoRotate); });
+$("btnWire").addEventListener("click", (e) => {
+  wire = !wire; e.currentTarget.setAttribute("aria-pressed", wire);
+  applyWire(demo); items.forEach((i) => i.object && applyWire(i.object));
+});
+$("btnFlip").addEventListener("click", () => {
+  for (const o of visibleObjects()) o.rotateX(Math.PI);
+  if (!items.length) centerOnFloor(demo);
+  frame(visibleObjects());
+});
+$("btnReset").addEventListener("click", () => frame(visibleObjects()));
+$("btnClear").addEventListener("click", () => { [...items].forEach((i) => removeItem(i.id)); });
+$("file").addEventListener("change", (e) => { handleFiles(e.target.files); e.target.value = ""; });
+
+for (const ev of ["dragenter", "dragover"]) stage.addEventListener(ev, (e) => { e.preventDefault(); stage.classList.add("drag"); });
+for (const ev of ["dragleave", "drop"]) stage.addEventListener(ev, (e) => { e.preventDefault(); stage.classList.remove("drag"); });
+stage.addEventListener("drop", (e) => handleFiles(e.dataTransfer.files));
+
+// ---------- 驗收清單（只記在這台裝置的瀏覽器） ----------
+const checks = [...document.querySelectorAll("#check input")];
+function updateProgress() { $("progress").textContent = `${checks.filter((c) => c.checked).length} / ${checks.length} 通過`; }
+try { const saved = JSON.parse(localStorage.getItem("viewer-checks") || "[]"); checks.forEach((c, i) => (c.checked = !!saved[i])); } catch {}
+checks.forEach((c) => c.addEventListener("change", () => {
+  updateProgress();
+  try { localStorage.setItem("viewer-checks", JSON.stringify(checks.map((x) => x.checked))); } catch {}
+}));
+updateProgress();
+
+// ---------- 迴圈 ----------
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+frame([demo]);
+
+let frames = 0, last = performance.now();
+renderer.setAnimationLoop(() => {
+  controls.update();
+  renderer.render(scene, camera);
+  frames++;
+  const now = performance.now();
+  if (now - last > 1000) {
+    const fps = Math.round((frames * 1000) / (now - last));
+    const el = $("hudFps");
+    el.textContent = `${fps} fps`;
+    el.className = "chip " + (fps >= 30 ? "ok" : "slow");
+    frames = 0; last = now;
+  }
+});
+</script>
