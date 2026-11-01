@@ -50,7 +50,7 @@ input[type=file]{display:none}
     <video id="cam" playsinline muted class="hide"></video>
     <div class="row" style="margin-top:8px">
       <button class="p" id="scanBtn">開啟掃描</button>
-      <button class="s" id="stopBtn" class="hide">停止</button>
+      <button class="s" id="stopBtn">停止</button>
     </div>
     <p class="mut" id="scanMsg">掃到條碼會自動 +1。不支援掃描的瀏覽器請用下方手動輸入。</p>
     <div class="row">
@@ -61,7 +61,7 @@ input[type=file]{display:none}
   <div class="card">
     <b>📷 拍照辨識計數</b>
     <p class="mut">拍一張擺放整齊的貨架(混放也可以)。AI 只做「建議」,確認後才計入。</p>
-    <label class="p">拍照 / 選照片<input type="file" id="photo" accept="image/*" capture="environment"></label>
+    <label class="p">拍照 / 選照片<input type="file" id="photo" accept="image/*"></label>
     <p class="mut" id="photoMsg"></p>
     <div id="aiRes"></div>
   </div>
@@ -139,21 +139,37 @@ $('#manual').addEventListener('keydown',e=>{if(e.key==='Enter')$('#addBtn').clic
 $('#clearBtn').onclick=()=>{if(confirm('確定清除本次盤點?')){counts={};locs={};save();renderList()}};
 
 // 掃描
-let stream=null,timer=null,last='',lastT=0;
+let stream=null,timer=null,busy=false,last='',lastSeen=0;
+function stopScan(){
+  clearInterval(timer);timer=null;busy=false;
+  stream&&stream.getTracks().forEach(t=>t.stop());stream=null;
+  $('#cam').classList.add('hide');
+}
 $('#scanBtn').onclick=async()=>{
+  if(stream)return;
   if(!('BarcodeDetector' in window)){$('#scanMsg').textContent='此瀏覽器不支援條碼掃描(建議 Android Chrome),請用手動輸入。';return}
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
     const v=$('#cam');v.srcObject=stream;v.classList.remove('hide');await v.play();
     const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+    last='';
     timer=setInterval(async()=>{
-      try{const r=await det.detect(v);if(r.length){const c=r[0].rawValue,t=Date.now();
-        if(c!==last||t-lastT>1500){last=c;lastT=t;add(c);navigator.vibrate&&navigator.vibrate(60);
-          $('#scanMsg').textContent='已掃:'+(master[c]?.name||c)}}}catch(e){}
-    },250);
-  }catch(e){$('#scanMsg').textContent='無法開啟相機:'+e.message+'(需 HTTPS 並允許權限)'}
+      if(busy)return;busy=true;
+      try{
+        const r=await det.detect(v),t=Date.now();
+        if(r.length){
+          const c=r[0].rawValue;
+          // 同一條碼持續在畫面中只算一次;離開畫面 0.8 秒後再出現才再算
+          if(c!==last||t-lastSeen>800){add(c);navigator.vibrate&&navigator.vibrate(60);
+            $('#scanMsg').textContent='已掃:'+(master[c]?.name||c)}
+          last=c;lastSeen=t;
+        }
+      }catch(e){}finally{busy=false}
+    },200);
+  }catch(e){stream=null;$('#scanMsg').textContent='無法開啟相機:'+e.message+'(需 HTTPS 並允許權限)'}
 };
-$('#stopBtn').onclick=()=>{clearInterval(timer);stream&&stream.getTracks().forEach(t=>t.stop());$('#cam').classList.add('hide')};
+$('#stopBtn').onclick=stopScan;
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScan()});
 
 // 商品資料
 function parseCSV(t){
@@ -165,8 +181,18 @@ function parseCSV(t){
 $('#csv').onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   const rows=parseCSV(await f.text()).slice(1);
-  master={};rows.forEach(r=>{if(r[0])master[r[0]]={name:r[1]||r[0],erp:parseFloat(r[2])||0}});
+  master={};let bad=0,dup=0;
+  rows.forEach(r=>{
+    if(!r[0])return;
+    if(/e\+/i.test(r[0]))bad++;
+    const erp=parseFloat((r[2]||'').replace(/,/g,''))||0;
+    if(master[r[0]]){dup++;master[r[0]].erp+=erp}else master[r[0]]={name:r[1]||r[0],erp};
+  });
   save();renderMaster();renderList();
+  const w=[];
+  if(bad)w.push(`${bad} 筆條碼像科學記號(如 4.71E+12),Excel 已破壞條碼,請把條碼欄設為「文字」後重新匯出。`);
+  if(dup)w.push(`${dup} 筆條碼重複,已合併數量。`);
+  if(w.length)alert(w.join('\n'));
 };
 $('#demoBtn').onclick=()=>{
   master={'4710088410013':{name:'洋芋片 原味 50g',erp:120},'4710088410020':{name:'洋芋片 海苔 50g',erp:96},
@@ -223,7 +249,13 @@ $('#photo').onchange=async e=>{
     if(k){h.Authorization='Bearer '+k;h.apikey=k}
     const r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify({image,media_type:'image/jpeg',products})});
     if(!r.ok)throw new Error('HTTP '+r.status);
-    aiItems=((await r.json()).items||[]).map(x=>({...x,count:Math.max(0,parseInt(x.count)||0)}));
+    const merged={};
+    for(const x of (await r.json()).items||[]){
+      const n=Math.max(0,parseInt(x.count)||0),key=x.code||('n:'+x.name);
+      if(merged[key]){merged[key].count+=n;if(x.confidence==='low')merged[key].confidence='low'}
+      else merged[key]={...x,count:n};
+    }
+    aiItems=Object.values(merged);
     $('#photoMsg').textContent=aiItems.length?'請核對數量,按「計入」確認(紅字為信心較低):':'沒有辨識到商品。';
     renderAI();
   }catch(err){$('#photoMsg').textContent='辨識失敗:'+err.message}
@@ -245,6 +277,7 @@ $('#aiRes').addEventListener('click',e=>{
   add(code,x.count);aiItems.splice(+b.dataset.i,1);renderAI();
 });
 
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 renderList();renderMaster();
 </script>
 </body>
