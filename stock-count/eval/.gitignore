@@ -1,0 +1,8 @@
+# 真實資料與評測結果不進版本控制
+photos/
+ref/
+products.csv
+ground_truth.csv
+results*.csv
+results*.json
+__pycache__/
