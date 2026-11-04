@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>倉庫盤點</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mut:#6b7280;--pri:#0f766e;--bad:#b91c1c;--ok:#15803d;--bd:#e5e7eb}
+@media(prefers-color-scheme:dark){:root{--bg:#111418;--card:#1b2026;--tx:#e8eaed;--mut:#9aa3ad;--pri:#2dd4bf;--bad:#f87171;--ok:#4ade80;--bd:#2c333b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Noto Sans TC",sans-serif;padding:0 16px 80px}
+h1{font-size:20px;margin:16px 0 8px}
+.tabs{display:flex;gap:6px;margin:8px 0 12px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+.tabs button{flex:1;padding:10px 4px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;font-size:15px}
+.tabs button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.mut{color:var(--mut);font-size:14px}
+button.p,label.p{display:inline-block;background:var(--pri);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
+button.s{background:transparent;color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;font-size:15px}
+input[type=text],input[type=number],textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:16px}
+video{width:100%;border-radius:10px;background:#000;max-height:300px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd);gap:8px}
+.item:last-child{border:0}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:40px;height:40px;border-radius:8px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font-size:20px}
+.qty input{width:64px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 4px;border-bottom:1px solid var(--bd);text-align:left}
+td.n,th.n{text-align:right}
+.bad{color:var(--bad);font-weight:600}.ok{color:var(--ok)}
+input[type=file]{display:none}
+.hide{display:none}
+</style>
+</head>
+<body>
+<h1>📦 倉庫盤點</h1>
+<div class="tabs">
+  <button data-t="count" class="on">盤點</button>
+  <button data-t="master">商品資料</button>
+  <button data-t="diff">差異報表</button>
+</div>
+
+<!-- 盤點 -->
+<section id="count">
+  <div class="card">
+    <div class="row" style="margin-bottom:8px">
+      <input type="text" id="loc" placeholder="盤點區位(例:A區-3架)" style="flex:1">
+    </div>
+    <video id="cam" playsinline muted class="hide"></video>
+    <div class="row" style="margin-top:8px">
+      <button class="p" id="scanBtn">開啟掃描</button>
+      <button class="s" id="stopBtn">停止</button>
+    </div>
+    <p class="mut" id="scanMsg">掃到條碼會自動 +1。不支援掃描的瀏覽器請用下方手動輸入。</p>
+    <div class="row">
+      <input type="text" id="manual" placeholder="手動輸入條碼 / 品名" style="flex:1" inputmode="search">
+      <button class="s" id="addBtn">加入</button>
+    </div>
+  </div>
+  <div class="card">
+    <b>📷 拍照辨識計數</b>
+    <p class="mut">拍一張擺放整齊的貨架(混放也可以)。AI 只做「建議」,確認後才計入。</p>
+    <label class="p">拍照 / 選照片<input type="file" id="photo" accept="image/*"></label>
+    <p class="mut" id="photoMsg"></p>
+    <div id="aiRes"></div>
+  </div>
+  <div class="card"><b>本次盤點</b> <span class="mut" id="sum"></span><div id="list"></div></div>
+  <button class="s" id="clearBtn">清除本次盤點</button>
+</section>
+
+<!-- 商品資料 -->
+<section id="master" class="hide">
+  <div class="card">
+    <b>匯入 ERP 商品與庫存</b>
+    <p class="mut">CSV 欄位順序:<code>條碼,品名,ERP帳面數量</code>(第一列為標題)。從 ERP 匯出後用 Excel 存成 CSV(UTF-8)即可。</p>
+    <label class="p">選擇 CSV<input type="file" id="csv" accept=".csv,text/csv"></label>
+    <button class="s" id="demoBtn">載入範例資料</button>
+    <p class="mut" id="mCount"></p>
+  </div>
+  <div class="card">
+    <b>拍照辨識後端網址</b>
+    <p class="mut">部署 <code>supabase/functions/count-photo</code> 後,填入函式網址;若函式需驗證,另填 anon key。</p>
+    <input type="text" id="apiUrl" placeholder="https://xxxx.supabase.co/functions/v1/count-photo" style="margin-bottom:8px">
+    <input type="text" id="apiKey" placeholder="anon key(選填)">
+  </div>
+</section>
+
+<!-- 差異報表 -->
+<section id="diff" class="hide">
+  <div class="card">
+    <div class="row"><b>實盤 vs ERP</b><button class="p" id="exp" style="margin-left:auto">匯出 CSV</button></div>
+    <p class="mut">只列出有差異的商品;盤點中尚未掃到的商品視為 0。</p>
+    <div style="overflow-x:auto"><table id="dt"></table></div>
+  </div>
+</section>
+
+<script>
+const $=s=>document.querySelector(s);
+const LS=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const SV=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let master=LS('sc_master')||{};   // barcode -> {name, erp}
+let counts=LS('sc_counts')||{};   // barcode -> qty
+let locs=LS('sc_locs')||{};       // barcode -> [區位]
+const save=()=>{SV('sc_master',master);SV('sc_counts',counts);SV('sc_locs',locs)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// tabs
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  ['count','master','diff'].forEach(t=>$('#'+t).classList.toggle('hide',t!==b.dataset.t));
+  if(b.dataset.t==='diff')renderDiff(); if(b.dataset.t==='master')renderMaster();
+});
+
+function add(code,n=1){
+  code=code.trim(); if(!code)return;
+  counts[code]=(counts[code]||0)+n; if(counts[code]<0)counts[code]=0;
+  const l=$('#loc').value.trim();
+  if(l){locs[code]=locs[code]||[]; if(!locs[code].includes(l))locs[code].push(l)}
+  save(); renderList();
+}
+function renderList(){
+  const keys=Object.keys(counts);
+  $('#sum').textContent=`(${keys.length} 項,共 ${keys.reduce((a,k)=>a+counts[k],0)} 件)`;
+  $('#list').innerHTML=keys.reverse().map(k=>`<div class="item">
+    <div><div>${esc(master[k]?.name||'未建檔商品')}</div><div class="mut">${esc(k)}${locs[k]?' · '+esc(locs[k].join('、')):''}</div></div>
+    <div class="qty"><button data-k="${esc(k)}" data-d="-1">−</button>
+    <input type="number" inputmode="numeric" value="${counts[k]}" data-k="${esc(k)}">
+    <button data-k="${esc(k)}" data-d="1">+</button></div></div>`).join('')||'<p class="mut">尚未盤點</p>';
+}
+$('#list').addEventListener('click',e=>{const b=e.target.closest('button');if(b)add(b.dataset.k,+b.dataset.d)});
+$('#list').addEventListener('change',e=>{if(e.target.matches('input')){counts[e.target.dataset.k]=Math.max(0,parseInt(e.target.value)||0);save();renderList()}});
+$('#addBtn').onclick=()=>{
+  const v=$('#manual').value.trim(); if(!v)return;
+  const hit=master[v]?v:Object.keys(master).find(k=>master[k].name.includes(v))||v;
+  add(hit); $('#manual').value='';
+};
+$('#manual').addEventListener('keydown',e=>{if(e.key==='Enter')$('#addBtn').click()});
+$('#clearBtn').onclick=()=>{if(confirm('確定清除本次盤點?')){counts={};locs={};save();renderList()}};
+
+// 掃描
+let stream=null,timer=null,busy=false,last='',lastSeen=0;
+function stopScan(){
+  clearInterval(timer);timer=null;busy=false;
+  stream&&stream.getTracks().forEach(t=>t.stop());stream=null;
+  $('#cam').classList.add('hide');
+}
+$('#scanBtn').onclick=async()=>{
+  if(stream)return;
+  if(!('BarcodeDetector' in window)){$('#scanMsg').textContent='此瀏覽器不支援條碼掃描(建議 Android Chrome),請用手動輸入。';return}
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('#cam');v.srcObject=stream;v.classList.remove('hide');await v.play();
+    const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+    last='';
+    timer=setInterval(async()=>{
+      if(busy)return;busy=true;
+      try{
+        const r=await det.detect(v),t=Date.now();
+        if(r.length){
+          const c=r[0].rawValue;
+          // 同一條碼持續在畫面中只算一次;離開畫面 0.8 秒後再出現才再算
+          if(c!==last||t-lastSeen>800){add(c);navigator.vibrate&&navigator.vibrate(60);
+            $('#scanMsg').textContent='已掃:'+(master[c]?.name||c)}
+          last=c;lastSeen=t;
+        }
+      }catch(e){}finally{busy=false}
+    },200);
+  }catch(e){stream=null;$('#scanMsg').textContent='無法開啟相機:'+e.message+'(需 HTTPS 並允許權限)'}
+};
+$('#stopBtn').onclick=stopScan;
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScan()});
+
+// 商品資料
+function parseCSV(t){
+  return t.replace(/^﻿/,'').split(/\r?\n/).filter(Boolean).map(l=>{
+    const o=[];let c='',q=false;
+    for(const ch of l){if(ch==='"')q=!q;else if(ch===','&&!q){o.push(c);c=''}else c+=ch}
+    o.push(c);return o.map(s=>s.trim())});
+}
+$('#csv').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rows=parseCSV(await f.text()).slice(1);
+  master={};let bad=0,dup=0;
+  rows.forEach(r=>{
+    if(!r[0])return;
+    if(/e\+/i.test(r[0]))bad++;
+    const erp=parseFloat((r[2]||'').replace(/,/g,''))||0;
+    if(master[r[0]]){dup++;master[r[0]].erp+=erp}else master[r[0]]={name:r[1]||r[0],erp};
+  });
+  save();renderMaster();renderList();
+  const w=[];
+  if(bad)w.push(`${bad} 筆條碼像科學記號(如 4.71E+12),Excel 已破壞條碼,請把條碼欄設為「文字」後重新匯出。`);
+  if(dup)w.push(`${dup} 筆條碼重複,已合併數量。`);
+  if(w.length)alert(w.join('\n'));
+};
+$('#demoBtn').onclick=()=>{
+  master={'4710088410013':{name:'洋芋片 原味 50g',erp:120},'4710088410020':{name:'洋芋片 海苔 50g',erp:96},
+    '4710105001234':{name:'礦泉水 600ml',erp:240},'4710105005678':{name:'燕麥餅乾 家庭號',erp:48}};
+  save();renderMaster();renderList();
+};
+function renderMaster(){const n=Object.keys(master).length;$('#mCount').textContent=n?`已載入 ${n} 項商品`:'尚未匯入商品資料'}
+
+// 差異
+function diffRows(){
+  const keys=new Set([...Object.keys(master),...Object.keys(counts)]);
+  return [...keys].map(k=>{const erp=master[k]?.erp??0,real=counts[k]||0;
+    return{code:k,name:master[k]?.name||'未建檔商品',erp,real,d:real-erp,loc:(locs[k]||[]).join('、')}})
+    .filter(r=>r.d!==0).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+}
+function renderDiff(){
+  const r=diffRows();
+  $('#dt').innerHTML='<tr><th>商品</th><th class="n">ERP</th><th class="n">實盤</th><th class="n">差異</th></tr>'+
+    (r.map(x=>`<tr><td>${esc(x.name)}<div class="mut">${esc(x.code)}</div></td><td class="n">${x.erp}</td><td class="n">${x.real}</td><td class="n bad">${x.d>0?'+':''}${x.d}</td></tr>`).join('')
+    ||'<tr><td colspan="4" class="ok">無差異 ✓</td></tr>');
+}
+$('#exp').onclick=()=>{
+  const q=s=>`"${String(s).replace(/"/g,'""')}"`;
+  const csv='﻿條碼,品名,ERP帳面,實盤,差異,區位\n'+diffRows().map(r=>[r.code,r.name,r.erp,r.real,r.d,r.loc].map(q).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='盤點差異_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+};
+
+// 拍照辨識
+$('#apiUrl').value=LS('sc_api')||'';$('#apiKey').value=LS('sc_key')||'';
+$('#apiUrl').onchange=e=>SV('sc_api',e.target.value.trim());
+$('#apiKey').onchange=e=>SV('sc_key',e.target.value.trim());
+
+function shrink(file,max=1600){ // 縮圖以節省流量
+  return new Promise((res,rej)=>{
+    const img=new Image();img.onload=()=>{
+      const s=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');c.width=img.width*s;c.height=img.height*s;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',0.85).split(',')[1]);
+    };img.onerror=rej;img.src=URL.createObjectURL(file);
+  });
+}
+let aiItems=[];
+$('#photo').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  const url=LS('sc_api');
+  if(!url){$('#photoMsg').textContent='請先到「商品資料」填入後端網址。';return}
+  $('#photoMsg').textContent='辨識中…';$('#aiRes').innerHTML='';
+  try{
+    const image=await shrink(f);
+    const products=Object.entries(master).map(([code,m])=>({code,name:m.name}));
+    const h={'Content-Type':'application/json'};const k=LS('sc_key');
+    if(k){h.Authorization='Bearer '+k;h.apikey=k}
+    const r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify({image,media_type:'image/jpeg',products})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const merged={};
+    for(const x of (await r.json()).items||[]){
+      const n=Math.max(0,parseInt(x.count)||0),key=x.code||('n:'+x.name);
+      if(merged[key]){merged[key].count+=n;if(x.confidence==='low')merged[key].confidence='low'}
+      else merged[key]={...x,count:n};
+    }
+    aiItems=Object.values(merged);
+    $('#photoMsg').textContent=aiItems.length?'請核對數量,按「計入」確認(紅字為信心較低):':'沒有辨識到商品。';
+    renderAI();
+  }catch(err){$('#photoMsg').textContent='辨識失敗:'+err.message}
+};
+function renderAI(){
+  $('#aiRes').innerHTML=aiItems.map((x,i)=>`<div class="item">
+    <div><div>${esc(x.name||'未知商品')}</div>
+    <div class="${x.confidence==='low'?'bad':'mut'}">${x.code?esc(x.code):'未對應到商品資料'} · 信心:${esc(x.confidence||'?')}${x.note?' · '+esc(x.note):''}</div></div>
+    <div class="qty"><input type="number" inputmode="numeric" value="${x.count}" data-i="${i}">
+    <button data-i="${i}" class="ok">✓</button></div></div>`).join('');
+}
+$('#aiRes').addEventListener('change',e=>{if(e.target.matches('input'))aiItems[+e.target.dataset.i].count=Math.max(0,parseInt(e.target.value)||0)});
+$('#aiRes').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const x=aiItems[+b.dataset.i];
+  const code=x.code||prompt('這個商品沒有對應條碼,請輸入條碼或自訂代號:',x.name||'');
+  if(!code)return;
+  if(!master[code]&&x.name)master[code]={name:x.name,erp:0};
+  add(code,x.count);aiItems.splice(+b.dataset.i,1);renderAI();
+});
+
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderList();renderMaster();
+</script>
+</body>
+</html>
