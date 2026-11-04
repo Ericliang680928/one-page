@@ -10,7 +10,7 @@ import Anthropic from "npm:@anthropic-ai/sdk";
 //   快取是「前綴比對」:system 區塊(規則 + 商品清單)放在前面並標記快取,
 //   每次都不同的照片放在 messages 最後。前綴任何一個字元不同就會失效,
 //   所以商品清單一律排序,且不得放入時間、隨機值等會變動的內容。
-// 評測腳本 eval/run_eval.py 會直接讀取下面兩個常數(RULES_TEMPLATE 與 USER_TEXT),請保持格式不變。
+// 評測腳本 eval/run_eval.py 會直接讀取下面三個常數(RULES_TEMPLATE、USER_TEXT、HINT_HEADER),請保持格式不變。
 // ---------------------------------------------------------------------------
 const RULES_TEMPLATE = `你是倉庫盤點助手。使用者會給你一張倉庫貨架上包裝食品的照片,請辨識並數出每種商品「肉眼可見」的數量。
 已知商品清單(條碼 | 品名):
@@ -24,6 +24,7 @@ const RULES_TEMPLATE = `你是倉庫盤點助手。使用者會給你一張倉�
 {"items":[{"code":string|null,"name":string,"count":number,"confidence":"high"|"medium"|"low","note":string}]}`;
 
 const USER_TEXT = `請辨識並計數這張照片。`;
+const HINT_HEADER = `過去人工修正的經驗提示(僅供參考;數量仍以照片實際可見為準,不可因提示而臆測看不到的商品):`;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -60,7 +61,7 @@ Deno.serve(async (req) => {
       .map((h: unknown) => String(h).replace(/\s+/g, " ").slice(0, 200))
       .filter((h: string) => h.length > 0);
     const userText = hintLines.length
-      ? `${USER_TEXT}\n\n過去人工修正的經驗提示(僅供參考;數量仍以照片實際可見為準,不可因提示而臆測看不到的商品):\n` +
+      ? `${USER_TEXT}\n\n${HINT_HEADER}\n` +
         hintLines.map((h: string) => `- ${h}`).join("\n")
       : USER_TEXT;
 

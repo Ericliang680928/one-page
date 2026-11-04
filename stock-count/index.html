@@ -227,7 +227,6 @@ function add(code,n=1,label,noSnap){
   touch(code);
   const l=$('#loc').value.trim();
   if(l){locs[code]=locs[code]||[]; if(!locs[code].includes(l))locs[code].push(l)}
-  sessionDone=false;
   save();renderAll();
   if(!noSnap)toast(`${nm(code)} → ${counts[code]}`);
 }
@@ -410,7 +409,8 @@ function getHints(){
   for(const [c,s] of Object.entries(mem.sku)){
     if(!master[c])continue;
     const n=master[c].name;
-    if(flagged(s)){const a=avgErr(s);out.push({w:Math.abs(a)*s.n,t:`「${n}」(${c})過去 ${s.n} 次人工修正後,AI 平均${a<0?'少算':'多算'}約 ${Math.abs(a).toFixed(1)} 件`})}
+    // 平均偏差只用於畫面標籤與一鍵計入的排除,不送給模型:最後數量含看不見的庫存,
+    // 送出去會與「只數看得見的」規則衝突,可能誘導模型臆測。待評測證明有幫助再開啟。
     for(const [o,k] of Object.entries(s.conf||{}))if(k>=2&&c<o&&master[o])out.push({w:k*3,t:`「${n}」與「${master[o].name}」過去常被混淆(${k} 次),請仔細比對包裝文字`});
     if(s.fp>=2)out.push({w:s.fp,t:`AI 曾 ${s.fp} 次誤報「${n}」不在照片中,沒看清楚請不要列出`});
     if(s.note)out.push({w:100,t:`「${n}」使用者備註:${s.note}`});
@@ -519,9 +519,9 @@ function renderAI(){
     <button data-i="${i}" data-a="ok" class="ok" aria-label="計入">✓</button>
     <button data-i="${i}" data-a="skip" aria-label="略過">✕</button>${x.code?`<button data-i="${i}" data-a="note" aria-label="備註">📝</button>`:''}</div></div>`}).join('');
 }
-function commit(x){learn(x);add(x.code,x.count,null,true)}
+function commit(x,learnIt=true){if(learnIt)learn(x);add(x.code,x.count,null,true)}
 function afterAI(){if(!aiItems.length&&batch.length)analyzeBatch();save();renderAI();renderAll();renderMem()}
-$('#aiRes').addEventListener('change',e=>{if(e.target.matches('input'))aiItems[+e.target.dataset.i].count=Math.max(0,parseInt(e.target.value)||0)});
+$('#aiRes').addEventListener('change',e=>{if(e.target.matches('input')){aiItems[+e.target.dataset.i].count=Math.max(0,parseInt(e.target.value)||0);save()}});
 $('#aiRes').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   const i=+b.dataset.i,x=aiItems[i];if(!x)return;
@@ -543,7 +543,7 @@ $('#aiRes').addEventListener('click',e=>{
 $('#aiBulk').addEventListener('click',e=>{
   if(e.target.id!=='bulkBtn')return;
   const el=bulkEligible();snapshot(`一次計入 ${el.length} 項`,true);
-  el.forEach(({x})=>commit(x));
+  el.forEach(({x})=>commit(x,false)); // 沒有人逐項檢查,不當作學習證據,否則信任門檻會自我強化
   aiItems=aiItems.filter(x=>!el.some(o=>o.x===x));afterAI();toast(`已計入 ${el.length} 項`);
 });
 

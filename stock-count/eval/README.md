@@ -52,6 +52,9 @@ python3 run_eval.py --direct --effort high --out results_high
 python3 run_eval.py --direct --max-side 1280
 python3 run_eval.py --direct --model claude-haiku-5-5 --price-in 0.10 --price-out 0.50
 
+# 比較有無學習提示(提示檔為 JSON 字串陣列,或每行一條)
+python3 run_eval.py --direct --hints hints.txt --out results_hints
+
 # 自我測試,不連網路
 python3 run_eval.py --truth ground_truth.sample.csv --products products.sample.csv --mock
 ```
