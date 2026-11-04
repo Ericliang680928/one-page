@@ -1,6 +1,6 @@
 // Supabase Edge Function:接收貨架照片,請 Claude 辨識並計數。
 // 需設定 secret:ANTHROPIC_API_KEY(金鑰只存在後端,不會出現在網頁)。
-// 選用 secret:COUNT_MODEL(預設 claude-sonnet-5-5)、COUNT_EFFORT(預設 medium)、COUNT_CACHE_TTL(5m 或 1h,預設 5m)
+// 選用 secret:APP_PASSCODE(設定後,呼叫端必須帶 x-app-passcode 標頭,避免網址被濫用)、COUNT_MODEL(預設 claude-sonnet-5-5)、COUNT_EFFORT(預設 medium)、COUNT_CACHE_TTL(5m 或 1h,預設 5m)
 // 部署:supabase functions deploy count-photo
 //       supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 import Anthropic from "npm:@anthropic-ai/sdk";
@@ -10,7 +10,7 @@ import Anthropic from "npm:@anthropic-ai/sdk";
 //   快取是「前綴比對」:system 區塊(規則 + 商品清單)放在前面並標記快取,
 //   每次都不同的照片放在 messages 最後。前綴任何一個字元不同就會失效,
 //   所以商品清單一律排序,且不得放入時間、隨機值等會變動的內容。
-// 評測腳本 eval/run_eval.py 會直接讀取下面兩個常數(RULES_TEMPLATE 與 USER_TEXT),請保持格式不變。
+// 評測腳本 eval/run_eval.py 會直接讀取下面三個常數(RULES_TEMPLATE、USER_TEXT、HINT_HEADER),請保持格式不變。
 // ---------------------------------------------------------------------------
 const RULES_TEMPLATE = `你是倉庫盤點助手。使用者會給你一張倉庫貨架上包裝食品的照片,請辨識並數出每種商品「肉眼可見」的數量。
 已知商品清單(條碼 | 品名):
@@ -24,10 +24,11 @@ const RULES_TEMPLATE = `你是倉庫盤點助手。使用者會給你一張倉�
 {"items":[{"code":string|null,"name":string,"count":number,"confidence":"high"|"medium"|"low","note":string}]}`;
 
 const USER_TEXT = `請辨識並計數這張照片。`;
+const HINT_HEADER = `過去人工修正的經驗提示(僅供參考;數量仍以照片實際可見為準,不可因提示而臆測看不到的商品):`;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-app-passcode",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 const rules = (list: string) => RULES_TEMPLATE.replace("{{LIST}}", list || "(無)");
@@ -38,7 +39,10 @@ const EFFORTS = ["low", "medium", "high", "xhigh", "max"];
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
-    const { image, media_type = "image/jpeg", products = [] } = await req.json();
+    const passcode = Deno.env.get("APP_PASSCODE");
+    if (passcode && req.headers.get("x-app-passcode") !== passcode) return json({ error: "unauthorized" }, 401);
+
+    const { image, media_type = "image/jpeg", products = [], hints = [] } = await req.json();
     if (!image) return json({ error: "missing image" }, 400);
     if (!MEDIA_TYPES.includes(media_type)) return json({ error: "unsupported media_type" }, 400);
     if (image.length > 7_000_000) return json({ error: "image too large" }, 413);
@@ -49,6 +53,17 @@ Deno.serve(async (req) => {
       .sort((a: { code: string }, b: { code: string }) => String(a.code).localeCompare(String(b.code)))
       .map((p: { code: string; name: string }) => `${p.code} | ${p.name}`)
       .join("\n");
+
+    // 學習記憶:前端檢索出的「過去人工修正經驗」。放在 messages 內(快取斷點之後),
+    // 不影響 system 的快取;逐條限制長度與數量,並去除換行。
+    const hintLines = (Array.isArray(hints) ? hints : [])
+      .slice(0, 15)
+      .map((h: unknown) => String(h).replace(/\s+/g, " ").slice(0, 200))
+      .filter((h: string) => h.length > 0);
+    const userText = hintLines.length
+      ? `${USER_TEXT}\n\n${HINT_HEADER}\n` +
+        hintLines.map((h: string) => `- ${h}`).join("\n")
+      : USER_TEXT;
 
     const effort = Deno.env.get("COUNT_EFFORT") ?? "medium";
     const ttl = Deno.env.get("COUNT_CACHE_TTL") === "1h" ? "1h" : "5m";
@@ -64,7 +79,7 @@ Deno.serve(async (req) => {
         role: "user",
         content: [
           { type: "image", source: { type: "base64", media_type, data: image } },
-          { type: "text", text: USER_TEXT },
+          { type: "text", text: userText },
         ],
       }],
     });

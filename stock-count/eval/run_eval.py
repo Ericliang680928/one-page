@@ -66,14 +66,23 @@ def load_prompts():
     src = EDGE_TS.read_text(encoding="utf-8")
     r = re.search(r"const RULES_TEMPLATE = `(.*?)`;", src, re.S)
     u = re.search(r"const USER_TEXT = `(.*?)`;", src, re.S)
-    if not (r and u):
-        sys.exit("無法從 index.ts 取出提示詞(RULES_TEMPLATE / USER_TEXT)")
-    return r.group(1), u.group(1)
+    h = re.search(r"const HINT_HEADER = `(.*?)`;", src, re.S)
+    if not (r and u and h):
+        sys.exit("無法從 index.ts 取出提示詞(RULES_TEMPLATE / USER_TEXT / HINT_HEADER)")
+    return r.group(1), u.group(1), h.group(1)
+
+
+def build_user_text(hints):
+    """與 Edge Function 相同:最多 15 條、每條 200 字、去除換行。"""
+    _, user, header = load_prompts()
+    lines = [re.sub(r"\s+", " ", str(h))[:200] for h in (hints or [])[:15]]
+    lines = [x for x in lines if x]
+    return user + "\n\n" + header + "\n" + "\n".join("- " + x for x in lines) if lines else user
 
 
 def build_rules(products):
     """與 Edge Function 相同:商品清單依條碼排序,確保前綴固定、可命中快取。"""
-    tpl, _ = load_prompts()
+    tpl = load_prompts()[0]
     items = sorted(products.items(), key=lambda kv: kv[0])[:500]
     plist = "\n".join(f"{c} | {p.get('name', '')}" for c, p in items)
     return tpl.replace("{{LIST}}", plist or "(無)")
@@ -118,7 +127,7 @@ def recognize(args, photo_path, products):
         except ImportError:
             sys.exit("--direct 需要安裝 SDK:pip install anthropic")
         client = anthropic.Anthropic()  # 讀取 ANTHROPIC_API_KEY
-        _, user_text = load_prompts()
+        user_text = build_user_text(args.hints_list)
         msg = client.messages.create(
             model=args.model, max_tokens=16000,
             output_config={"effort": args.effort},
@@ -140,7 +149,8 @@ def recognize(args, photo_path, products):
         h["Authorization"] = "Bearer " + args.key
         h["apikey"] = args.key
     body = {"image": b64, "media_type": "image/jpeg",
-            "products": [{"code": c, "name": p.get("name", "")} for c, p in products.items()]}
+            "products": [{"code": c, "name": p.get("name", "")} for c, p in products.items()],
+            "hints": args.hints_list}
     res = post_json(args.endpoint, body, h)
     return res.get("items", []), res.get("usage")
 
@@ -285,6 +295,19 @@ def summarize(rows, unknown_all, target, usages=None, args=None):
     print(f"\n目標:誤差 10% 以內 ≥ {target:.0%} → {'達標 ✓' if ok else '未達標 ✗'}")
 
 
+def load_hints(path):
+    if not path:
+        return []
+    text = Path(path).read_text(encoding="utf-8").strip()
+    try:
+        data = json.loads(text)
+        if isinstance(data, list):
+            return [str(x) for x in data]
+    except json.JSONDecodeError:
+        pass
+    return [ln.strip() for ln in text.splitlines() if ln.strip()]
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--photos", default="photos", help="照片資料夾")
@@ -299,6 +322,7 @@ def main():
                     help="思考深度,影響輸出 token(與 Edge Function 的 COUNT_EFFORT 對應)")
     ap.add_argument("--cache-ttl", default="5m", choices=["5m", "1h"])
     ap.add_argument("--max-side", type=int, default=1600, help="照片長邊像素,越小越省 token")
+    ap.add_argument("--hints", help="學習提示檔(JSON 字串陣列,或每行一條的文字檔),用來比較有無提示的準確度")
     ap.add_argument("--price-in", type=float, default=2.0, help="輸入單價 USD/百萬 token(預設 Sonnet 5.5)")
     ap.add_argument("--price-out", type=float, default=10.0, help="輸出單價 USD/百萬 token")
     ap.add_argument("--mock", action="store_true", help="自我測試,不連網路")
@@ -307,6 +331,7 @@ def main():
     if not (args.direct or args.endpoint or args.mock):
         ap.error("請指定 --direct、--endpoint 或 --mock 其中之一")
 
+    args.hints_list = load_hints(args.hints)
     products, truth = load_products(args.products), load_truth(args.truth)
     if not truth:
         sys.exit("ground_truth.csv 沒有資料")
