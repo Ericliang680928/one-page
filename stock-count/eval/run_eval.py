@@ -11,7 +11,8 @@
   # 自我測試(不連網路、不需照片)
   python3 run_eval.py ... --mock
 
-只用標準函式庫;若有安裝 Pillow 會自動縮圖(與網頁行為一致)。
+--direct 需要 `pip install anthropic`;建議再裝 Pillow 以自動縮圖(與網頁行為一致)。
+其餘模式只用標準函式庫。
 """
 import argparse
 import base64
@@ -61,17 +62,25 @@ def load_truth(path):
 
 
 # ---------- 提示詞(直接從 Edge Function 原始碼取出,避免兩邊不一致) ----------
-def build_prompt(products):
+def load_prompts():
     src = EDGE_TS.read_text(encoding="utf-8")
-    m = re.search(r"const prompt = `(.*?)`;", src, re.S)
-    if not m:
-        sys.exit("無法從 index.ts 取出提示詞")
-    plist = "\n".join(f"{c} | {p.get('name', '')}" for c, p in list(products.items())[:500])
-    return m.group(1).replace('${list || "(無)"}', plist or "(無)")
+    r = re.search(r"const RULES_TEMPLATE = `(.*?)`;", src, re.S)
+    u = re.search(r"const USER_TEXT = `(.*?)`;", src, re.S)
+    if not (r and u):
+        sys.exit("無法從 index.ts 取出提示詞(RULES_TEMPLATE / USER_TEXT)")
+    return r.group(1), u.group(1)
+
+
+def build_rules(products):
+    """與 Edge Function 相同:商品清單依條碼排序,確保前綴固定、可命中快取。"""
+    tpl, _ = load_prompts()
+    items = sorted(products.items(), key=lambda kv: kv[0])[:500]
+    plist = "\n".join(f"{c} | {p.get('name', '')}" for c, p in items)
+    return tpl.replace("{{LIST}}", plist or "(無)")
 
 
 # ---------- 圖片 ----------
-def image_b64(path, max_side=1600):
+def image_b64(path, max_side=1600):  # 可用 --max-side 覆寫
     data = Path(path).read_bytes()
     try:
         from PIL import Image  # 選用
@@ -101,38 +110,49 @@ def parse_items(text):
 
 
 def recognize(args, photo_path, products):
+    """回傳 (items, usage);usage 為 dict(input, cache_write, cache_read, output) 或 None。"""
+    b64 = image_b64(photo_path, args.max_side)
     if args.direct:
-        key = os.environ.get("ANTHROPIC_API_KEY")
-        if not key:
-            sys.exit("--direct 需要環境變數 ANTHROPIC_API_KEY")
-        body = {
-            "model": args.model, "max_tokens": 2000,
-            "messages": [{"role": "user", "content": [
-                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
-                                              "data": image_b64(photo_path)}},
-                {"type": "text", "text": build_prompt(products)}]}],
-        }
-        res = post_json("https://api.anthropic.com/v1/messages", body,
-                        {"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"})
-        text = next((c["text"] for c in res.get("content", []) if c.get("type") == "text"), "")
-        return parse_items(text)
+        try:
+            import anthropic
+        except ImportError:
+            sys.exit("--direct 需要安裝 SDK:pip install anthropic")
+        client = anthropic.Anthropic()  # 讀取 ANTHROPIC_API_KEY
+        _, user_text = load_prompts()
+        msg = client.messages.create(
+            model=args.model, max_tokens=16000,
+            output_config={"effort": args.effort},
+            system=[{"type": "text", "text": build_rules(products),
+                     "cache_control": {"type": "ephemeral", "ttl": args.cache_ttl}}],
+            messages=[{"role": "user", "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b64}},
+                {"type": "text", "text": user_text}]}],
+        )
+        u = msg.usage
+        usage = {"input": u.input_tokens, "cache_write": getattr(u, "cache_creation_input_tokens", 0) or 0,
+                 "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0, "output": u.output_tokens}
+        if msg.stop_reason in ("refusal", "max_tokens"):
+            raise RuntimeError(f"stop_reason={msg.stop_reason}")
+        text = next((c.text for c in msg.content if c.type == "text"), "")
+        return parse_items(text), usage
     h = {"Content-Type": "application/json"}
     if args.key:
         h["Authorization"] = "Bearer " + args.key
         h["apikey"] = args.key
-    body = {"image": image_b64(photo_path), "media_type": "image/jpeg",
+    body = {"image": b64, "media_type": "image/jpeg",
             "products": [{"code": c, "name": p.get("name", "")} for c, p in products.items()]}
-    return post_json(args.endpoint, body, h).get("items", [])
+    res = post_json(args.endpoint, body, h)
+    return res.get("items", []), res.get("usage")
 
 
 def recognize_retry(args, photo_path, products, tries=3):
     for i in range(tries):
         try:
             return recognize(args, photo_path, products)
-        except (urllib.error.URLError, json.JSONDecodeError, TimeoutError) as e:
+        except (urllib.error.URLError, json.JSONDecodeError, TimeoutError, RuntimeError, OSError) as e:
             print(f"  ! {photo_path} 第 {i + 1} 次失敗:{e}", file=sys.stderr)
             time.sleep(2 ** i)
-    return None
+    return None, None
 
 
 def mock_items(truth_counts):
@@ -182,7 +202,7 @@ def pct(a, b):
     return f"{100 * a / b:.1f}%" if b else "n/a"
 
 
-def summarize(rows, unknown_all, target):
+def summarize(rows, unknown_all, target, usages=None, args=None):
     n = len(rows)
     exact = sum(r["err"] == 0 for r in rows)
     w1 = sum(abs(r["err"]) <= 1 for r in rows)
@@ -246,6 +266,21 @@ def summarize(rows, unknown_all, target):
     for r in sorted(rows, key=lambda r: -abs(r["err"]))[:10]:
         print(f"  {r['photo']} {r['name'][:14]:14s} 人工 {r['truth']:3d} AI {r['pred']:3d} ({r['err']:+d}) 信心 {r['conf']}")
 
+    if usages:
+        k = len(usages)
+        tot = {f: sum(u[f] for u in usages) for f in ("input", "cache_write", "cache_read", "output")}
+        print(f"\n--- Token 用量與成本(共 {k} 次呼叫) ---")
+        print(f"  平均每張:未快取輸入 {tot['input'] / k:.0f}、寫入快取 {tot['cache_write'] / k:.0f}、"
+              f"讀取快取 {tot['cache_read'] / k:.0f}、輸出(含思考) {tot['output'] / k:.0f}")
+        inp_all = tot["input"] + tot["cache_write"] + tot["cache_read"]
+        print(f"  快取命中率(讀取 / 全部輸入):{pct(tot['cache_read'], inp_all)}")
+        if args:
+            cost = (tot["input"] * args.price_in + tot["cache_write"] * args.price_in * 1.25
+                    + tot["cache_read"] * args.price_in * 0.1 + tot["output"] * args.price_out) / 1e6
+            nocache = (inp_all * args.price_in + tot["output"] * args.price_out) / 1e6
+            print(f"  估算成本:共 ${cost:.4f}(每張 ${cost / k:.4f});若完全沒有快取約 ${nocache:.4f}")
+            print(f"  (單價 輸入 ${args.price_in}/百萬、輸出 ${args.price_out}/百萬;寫入快取 1.25 倍、讀取 0.1 倍。請以官方最新價格為準)")
+
     ok = n and w10 / n >= target
     print(f"\n目標:誤差 10% 以內 ≥ {target:.0%} → {'達標 ✓' if ok else '未達標 ✗'}")
 
@@ -260,6 +295,12 @@ def main():
     ap.add_argument("--endpoint", help="已部署的 count-photo 函式網址")
     ap.add_argument("--key", help="Supabase anon key(選填)")
     ap.add_argument("--model", default="claude-sonnet-5-5")
+    ap.add_argument("--effort", default="medium", choices=["low", "medium", "high", "xhigh", "max"],
+                    help="思考深度,影響輸出 token(與 Edge Function 的 COUNT_EFFORT 對應)")
+    ap.add_argument("--cache-ttl", default="5m", choices=["5m", "1h"])
+    ap.add_argument("--max-side", type=int, default=1600, help="照片長邊像素,越小越省 token")
+    ap.add_argument("--price-in", type=float, default=2.0, help="輸入單價 USD/百萬 token(預設 Sonnet 5.5)")
+    ap.add_argument("--price-out", type=float, default=10.0, help="輸出單價 USD/百萬 token")
     ap.add_argument("--mock", action="store_true", help="自我測試,不連網路")
     ap.add_argument("--target", type=float, default=0.9, help="『誤差 10% 以內』的目標比例")
     args = ap.parse_args()
@@ -269,7 +310,7 @@ def main():
     products, truth = load_products(args.products), load_truth(args.truth)
     if not truth:
         sys.exit("ground_truth.csv 沒有資料")
-    rows, unknown_all, failed = [], [], []
+    rows, unknown_all, failed, usages = [], [], [], []
     for i, (photo, counts) in enumerate(sorted(truth.items()), 1):
         print(f"[{i}/{len(truth)}] {photo}")
         if args.mock:
@@ -280,10 +321,12 @@ def main():
                 print(f"  ! 找不到照片 {path},略過", file=sys.stderr)
                 failed.append(photo)
                 continue
-            items = recognize_retry(args, path, products)
+            items, usage = recognize_retry(args, path, products)
             if items is None:
                 failed.append(photo)
                 continue
+            if usage:
+                usages.append(usage)
         r, u = compare(photo, counts, items, products)
         rows += r
         unknown_all += [(photo, *x) for x in u]
@@ -296,7 +339,7 @@ def main():
         w.writerows(rows)
     with open(f"{args.out}_unknown.json", "w", encoding="utf-8") as f:
         json.dump(unknown_all, f, ensure_ascii=False, indent=1)
-    summarize(rows, unknown_all, args.target)
+    summarize(rows, unknown_all, args.target, usages, args)
     if failed:
         print(f"\n失敗或略過的照片:{', '.join(failed)}")
     print(f"\n明細已存:{args.out}.csv、{args.out}_unknown.json")

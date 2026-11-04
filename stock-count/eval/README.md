@@ -17,6 +17,7 @@
 | `look_alike_group` | | 容易混淆的群組代號(同群組填同一個字串),例如同系列不同口味。 |
 | `ref_photo` | | 參考照片檔名,之後用來輔助比對外觀。 |
 | `notes` | | 備註,例如擺放習慣。 |
+| `zone` | | 預設存放區域。之後盤點時只送該區商品清單,可大幅降低 token。 |
 
 目前評測只使用 `barcode` 與 `name`,其餘欄位為階段 1 到 2 預留,可以先填。
 
@@ -37,12 +38,19 @@
 
 ```bash
 cd stock-count/eval
-# 直接呼叫 Claude(部署前即可;需設定金鑰)
+# 直接呼叫 Claude(部署前即可;需安裝 SDK 並設定金鑰)
+pip install anthropic pillow
 export ANTHROPIC_API_KEY=...
 python3 run_eval.py --direct
 
 # 或測已部署的函式
 python3 run_eval.py --endpoint https://xxxx.supabase.co/functions/v1/count-photo --key <anon key>
+
+# 比較思考深度、照片大小、模型(各跑一次,看報告最後的成本區段)
+python3 run_eval.py --direct --effort low
+python3 run_eval.py --direct --effort high --out results_high
+python3 run_eval.py --direct --max-side 1280
+python3 run_eval.py --direct --model claude-haiku-5-5 --price-in 0.10 --price-out 0.50
 
 # 自我測試,不連網路
 python3 run_eval.py --truth ground_truth.sample.csv --products products.sample.csv --mock
@@ -59,6 +67,7 @@ python3 run_eval.py --truth ground_truth.sample.csv --products products.sample.c
 | 信心度可信嗎 | 高信心應明顯比低信心準。若沒有差別,「低信心才人工確認」的設計就不成立。 |
 | 疑似混淆 | 同張照片一個商品少算、另一個多算,通常是相似口味被認錯。 |
 | 幻覺 | 回報了主檔以外的條碼。 |
+| Token 用量與成本 | 平均每張各類 token、快取命中率、估算成本。命中率偏低代表快取前綴被破壞。 |
 
 明細輸出到 `results.csv`(每張照片×商品一列)與 `results_unknown.json`(對不上主檔的商品)。
 
