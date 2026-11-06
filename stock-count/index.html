@@ -547,6 +547,12 @@ $('#aiBulk').addEventListener('click',e=>{
   aiItems=aiItems.filter(x=>!el.some(o=>o.x===x));afterAI();toast(`已計入 ${el.length} 項`);
 });
 
+// 若網頁由 NAS 伺服器提供,自動使用同一台的辨識 API(其他情況會得到 404,直接略過)
+if(!LS('sc_api')&&location.protocol.startsWith('http')){
+  fetch('api/healthz',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{
+    if(j&&j.service==='stock-count'&&!LS('sc_api')){const u=new URL('api/count-photo',location.href).href;SV('sc_api',u);$('#apiUrl').value=u}
+  }).catch(()=>{});
+}
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 renderAll();renderMaster();renderMem();renderAI();
 if(aiItems.length)$('#photoMsg').textContent=`上次還有 ${aiItems.length} 項辨識結果沒確認,已為你保留:`;

@@ -12,13 +12,15 @@ description: 倉庫盤點專案(stock-count/)的開發與維運知識。凡是�
 | 路徑 | 用途 |
 |---|---|
 | `stock-count/index.html`、`sw.js` | 前端(單檔、可離線、資料存手機本機) |
-| `stock-count/supabase/functions/count-photo/index.ts` | 辨識後端,含提示詞與快取設計 |
+| `stock-count/supabase/functions/_shared/count.ts` | **辨識邏輯唯一來源**(提示詞、快取設計、驗證、錯誤處理),Supabase 與 NAS 共用 |
+| `stock-count/supabase/functions/count-photo/index.ts` | Supabase Edge Function 入口(一行呼叫共用模組) |
+| `stock-count/nas/` | NAS 部署:`server.ts`(網頁 + API 同一個程式)、`Dockerfile`、`docker-compose.yml`、`README.md`(DS218+ 步驟)、`test/server.test.js` |
 | `stock-count/eval/run_eval.py` | 準確度與成本評測(階段 0) |
 | `stock-count/eval/README.md` | 主檔格式、人工計數格式、報告怎麼看 |
 
 ## 修改後端時必守的規則
 
-1. **提示詞唯一來源是 `index.ts`**:`RULES_TEMPLATE`(含 `{{LIST}}` 佔位符)與 `USER_TEXT`。評測腳本用正規表示式讀這兩個常數,**改名或改格式會讓評測失效**。
+1. **提示詞唯一來源是 `_shared/count.ts`**:`RULES_TEMPLATE`(含 `{{LIST}}` 佔位符)、`USER_TEXT`、`HINT_HEADER`。評測腳本用正規表示式讀這三個常數,**改名或改格式會讓評測失效**。辨識邏輯**只在這個檔案改**,不要在 `index.ts` 或 `nas/server.ts` 另寫一份。
 2. **商品清單一律依條碼排序**後再放進 system。快取是前綴比對,順序不同就是不同前綴,不會命中。
 3. **快取前綴內不得有會變動的內容**:時間、隨機值、請求編號、使用者名稱都不行。會變的東西(照片)只放在 `messages` 最後。
 4. **`max_tokens` 不可設小**(現為 16000)。Sonnet 5.5 預設會思考,思考 token 也算在 `max_tokens` 內,設太小會把輸出截斷。程式已對 `max_tokens` 與 `refusal` 兩種停止原因回報錯誤。
@@ -113,6 +115,30 @@ description: 倉庫盤點專案(stock-count/)的開發與維運知識。凡是�
 
 ### token 影響
 學習提示最多約 15 條,每張照片多約 600 到 1,000 個未快取的輸入 token,以 Sonnet 5.5 參考價約多 $0.002 到 $0.003,遠小於輸出成本。評測腳本支援 `--hints FILE`(JSON 字串陣列,或每行一條),`--direct` 與 `--endpoint` 都會帶入,格式與後端一致。用同一批照片分別跑有、無提示,比較準確度;沒有提升就關閉學習記憶或縮短提示。**目前尚未用真實資料驗證學習提示是否有效。**
+
+## NAS 部署(Synology DS218+)
+
+### 決策
+使用者有 DS218+(x86、Container Manager 可用、出廠 2GB 記憶體)。評估後的方向:**一個容器同時提供網頁與 API**,省記憶體、少一層設定,也避免跨網域與混合內容問題。Supabase 與 NAS 兩條路共用同一份 `_shared/count.ts`,評測不受影響。
+
+### 關鍵事實(容易忽略)
+- **HTTP 下仍可用**:「拍照 / 選照片」(呼叫手機相機 App)、手動輸入、拍照辨識。
+- **需要 HTTPS 才能用**:即時條碼掃描(`getUserMedia`)與離線快取(service worker)。所以區網 `http://NAS-IP` 只適合測試,正式使用要接 HTTPS。
+- 連線方式三選一:A. Synology DDNS + Let's Encrypt + 反向代理(要開路由器 443);B. Cloudflare Tunnel(要網域,不開埠);C. Tailscale(最封閉,每支手機要裝)。細節在 `nas/README.md`。
+- 網頁在 NAS 上會自動偵測 `api/healthz` 並填入同源的辨識 API 網址;在 GitHub Pages 上該請求為 404,會被略過。
+
+### 守則
+1. **啟動檢查**:缺 `ANTHROPIC_API_KEY` 或 `APP_PASSCODE` 就拒絕啟動。不要為了方便移除,沒有密碼等於把 API 額度交給知道網址的人。
+2. **只提供固定路徑**:`/`、`/index.html`、`/sw.js`。不要改成提供整個目錄。新增靜態檔要加到 `server.ts` 的 `STATIC` 白名單。
+3. **日誌不得記錄內容**:只記時間、來源、方法、路徑、狀態碼、耗時。照片、hints、密碼、金鑰都不能進日誌(測試有檢查)。
+4. **流量限制**:每個來源每分鐘 `RATE_PER_MIN`(預設 12)。只有在前面確實有反向代理時才設 `TRUST_PROXY=1`,否則來源可被偽造。
+5. **容器最小權限**:唯讀檔案系統、`cap_drop: ALL`、記憶體上限 256MB、只綁 `127.0.0.1`。Deno 以 `--allow-net --allow-env --allow-read=/app/web` 執行。新增功能若需要更多權限,先想想有沒有必要。
+6. **Deno 版本固定**(`nas/Dockerfile`),升級前跑全部測試。
+
+### 驗證狀態
+- 已驗證:`deno check` 型別檢查;`nas/test/server.test.js` 34 項(驗證、限流、路徑安全、請求內容與快取標記、hints 清理、各種錯誤碼、啟動檢查、日誌不含機密);瀏覽器端到端(自動偵測後端、拍照辨識、錯誤密碼提示、CSP 無資源被擋、service worker 不快取 API)。上游 Claude 皆為**模擬服務**。
+- **未驗證**:Docker 映像實際建置(開發環境沒有 Docker 引擎)、在真實 DS218+ 上執行、Container Manager 與 DSM 選單步驟、真實 Claude API(含快取是否命中、`cache_control.ttl` 與 `output_config` 是否被接受)、記憶體實際用量。
+- 修改後端後的檢查指令:`deno check nas/server.ts supabase/functions/count-photo/index.ts`,以及 `DENO=... node nas/test/server.test.js`。
 
 ## 計費:訂閱與 API 是分開的
 

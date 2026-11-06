@@ -29,7 +29,7 @@ from collections import defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-EDGE_TS = HERE.parent / "supabase" / "functions" / "count-photo" / "index.ts"
+EDGE_TS = HERE.parent / "supabase" / "functions" / "_shared" / "count.ts"
 
 
 # ---------- 讀資料 ----------
@@ -68,7 +68,7 @@ def load_prompts():
     u = re.search(r"const USER_TEXT = `(.*?)`;", src, re.S)
     h = re.search(r"const HINT_HEADER = `(.*?)`;", src, re.S)
     if not (r and u and h):
-        sys.exit("無法從 index.ts 取出提示詞(RULES_TEMPLATE / USER_TEXT / HINT_HEADER)")
+        sys.exit("無法從 _shared/count.ts 取出提示詞(RULES_TEMPLATE / USER_TEXT / HINT_HEADER)")
     return r.group(1), u.group(1), h.group(1)
 
 
