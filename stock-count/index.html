@@ -44,6 +44,9 @@ input[type=file]{display:none}
 .dlg{background:var(--card);width:100%;max-width:520px;max-height:80vh;overflow:auto;border-radius:16px 16px 0 0;padding:16px}
 .dlg .opt{display:block;width:100%;text-align:left;min-height:52px;margin:6px 0;border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:10px;padding:8px 12px;font-size:16px}
 details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+.sel{outline:2px solid var(--pri);outline-offset:2px;border-radius:8px}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-1px;border:2px solid #fff;box-shadow:0 0 0 1px var(--bd)}
+#lc{width:100%;border-radius:10px;touch-action:manipulation;cursor:crosshair;display:block}
 ul.l{margin:4px 0;padding-left:20px}ul.l li{margin:2px 0}
 </style>
 </head>
@@ -79,6 +82,26 @@ ul.l{margin:4px 0;padding-left:20px}ul.l li{margin:2px 0}
     <div class="row">
       <input type="text" id="manual" placeholder="手動輸入條碼 / 品名" style="flex:1" inputmode="search">
       <button class="s" id="addBtn">加入</button>
+    </div>
+  </div>
+  <div class="card">
+    <b>🎥 即時點貨</b>
+    <p class="mut">鏡頭對準一格貨架、拿穩,畫面會自動定格,並在每一件商品上標一個點。<b>點一下圓點可刪除,點空白處可補上</b>,點數就是數量。</p>
+    <div id="liveWrap" class="hide">
+      <video id="lv" playsinline muted></video>
+      <canvas id="lc" class="hide"></canvas>
+      <div class="bar"><i id="steadyBar"></i></div>
+    </div>
+    <div class="row">
+      <button class="p" id="liveBtn">開始即時點貨</button>
+      <button class="s hide" id="shotBtn">立即定格</button>
+      <button class="s hide" id="liveStop">關閉鏡頭</button>
+    </div>
+    <p class="mut" id="liveMsg"></p>
+    <div id="liveLegend"></div>
+    <div class="row hide" id="liveAct">
+      <button class="p" id="liveOk" style="flex:1">✓ 全部計入,下一格</button>
+      <button class="s" id="liveRetry">重拍</button>
     </div>
   </div>
   <div class="card">
@@ -201,9 +224,12 @@ function closeDlg(){$('#ov').classList.add('hide');$('#dlg').innerHTML=''}
 function pick({title,query='',allowNew=false,newName='',onPick}){
   const d=$('#dlg');
   const draw=q=>{
-    const m=findMatches(q).slice(0,8);
+    let m=findMatches(q),none=false;
+    if(!m.length&&q){m=findMatches('');none=true}        // 找不到就列出全部,不用自己清掉文字
+    m=m.slice(0,8);
     d.innerHTML=`<div class="row"><b style="flex:1">${esc(title)}</b><button class="s" id="dx">✕</button></div>
       <input type="text" id="dq" value="${esc(q)}" placeholder="搜尋品名或條碼" style="margin:8px 0">
+      ${none&&m.length?'<p class="mut">沒有符合的商品,以下是全部商品(可改搜尋字):</p>':''}
       ${m.map(c=>`<button class="opt" data-c="${esc(c)}">${esc(master[c].name)}<div class="mut">${esc(c)}</div></button>`).join('')||'<p class="mut">沒有符合的商品</p>'}
       ${allowNew&&newName?`<button class="opt" data-new="1">＋ 新增為未建檔商品「${esc(newName)}」</button>`:''}`;
     d.querySelector('#dx').onclick=closeDlg;
@@ -317,6 +343,7 @@ function stopScan(){
 }
 $('#scanBtn').onclick=async()=>{
   if(stream)return;
+  liveStop();
   if(!('BarcodeDetector' in window)){$('#scanMsg').textContent='此瀏覽器不支援條碼掃描(建議 Android Chrome),請用手動輸入。';return}
   try{
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
@@ -342,7 +369,7 @@ $('#scanBtn').onclick=async()=>{
   }catch(e){stream=null;$('#scanMsg').textContent='無法開啟相機:'+e.message+'(需 HTTPS 並允許權限)'}
 };
 $('#stopBtn').onclick=stopScan;
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stopScan()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopScan();liveCamOff()}});
 
 // ---------- 商品資料 ----------
 function parseCSV(t){
@@ -477,6 +504,32 @@ function shrink(file,max=1600){ // 縮圖以節省流量
     img.src=u;
   });
 }
+async function apiCount(image,points){
+  const url=LS('sc_api');
+  const products=Object.entries(master).map(([code,m])=>({code,name:m.name}));
+  const h={'Content-Type':'application/json'};const k=LS('sc_key'),p=LS('sc_pass');
+  if(k){h.Authorization='Bearer '+k;h.apikey=k}
+  if(p)h['x-app-passcode']=p;
+  const r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify({image,media_type:'image/jpeg',products,hints:getHints(),points})});
+  if(!r.ok)throw new Error(r.status===401?'未授權(請檢查存取密碼或 anon key)':r.status===429?'太頻繁,請稍等幾秒再試':'HTTP '+r.status);
+  return (await r.json()).items||[];
+}
+const okPt=p=>Array.isArray(p)&&p.length>=2&&Number.isFinite(+p[0])&&Number.isFinite(+p[1]);
+const clamp=v=>Math.min(1000,Math.max(0,Math.round(+v)));
+function normItems(raw){ // 對應主檔、套用別名、合併同商品;pts 為每一件的位置(0–1000 比例座標)
+  const merged={};
+  for(const x of raw){
+    const pts=(Array.isArray(x.points)?x.points:[]).filter(okPt).map(p=>[clamp(p[0]),clamp(p[1])]);
+    const n=pts.length||Math.max(0,parseInt(x.count)||0);   // 有標位置時,點數就是數量
+    let code=x.code&&master[x.code]?x.code:null;          // 主檔以外的條碼視為未對應,避免污染主檔
+    let fromAlias=false;
+    if(!code){const a=mem.alias[normName(x.name)];if(a&&master[a]){code=a;fromAlias=true}}
+    const key=code||('n:'+normName(x.name));
+    if(merged[key]){const m=merged[key];m.count+=n;m.orig+=n;m.pts.push(...pts);if(x.confidence==='low')m.confidence='low'}
+    else merged[key]={code,name:x.name||'',count:n,orig:n,confidence:x.confidence||'medium',note:x.note||'',fromAlias,pts};
+  }
+  return Object.values(merged);
+}
 $('#photo').onchange=async e=>{
   const f=e.target.files[0];e.target.value='';if(!f)return;
   const url=LS('sc_api');
@@ -485,23 +538,7 @@ $('#photo').onchange=async e=>{
   $('#photoMsg').textContent='辨識中…';aiItems=[];batch=[];renderAI();save();
   try{
     const image=await shrink(f);
-    const products=Object.entries(master).map(([code,m])=>({code,name:m.name}));
-    const h={'Content-Type':'application/json'};const k=LS('sc_key'),p=LS('sc_pass');
-    if(k){h.Authorization='Bearer '+k;h.apikey=k}
-    if(p)h['x-app-passcode']=p;
-    const r=await fetch(url,{method:'POST',headers:h,body:JSON.stringify({image,media_type:'image/jpeg',products,hints:getHints()})});
-    if(!r.ok)throw new Error(r.status===401?'未授權(請檢查存取密碼或 anon key)':'HTTP '+r.status);
-    const merged={};
-    for(const x of (await r.json()).items||[]){
-      const n=Math.max(0,parseInt(x.count)||0);
-      let code=x.code&&master[x.code]?x.code:null;          // 主檔以外的條碼視為未對應,避免污染主檔
-      let fromAlias=false;
-      if(!code){const a=mem.alias[normName(x.name)];if(a&&master[a]){code=a;fromAlias=true}}
-      const key=code||('n:'+normName(x.name));
-      if(merged[key]){merged[key].count+=n;merged[key].orig+=n;if(x.confidence==='low')merged[key].confidence='low'}
-      else merged[key]={code,name:x.name||'',count:n,orig:n,confidence:x.confidence||'medium',note:x.note||'',fromAlias};
-    }
-    aiItems=Object.values(merged);save();
+    aiItems=normItems(await apiCount(image,false));save();
     $('#photoMsg').textContent=aiItems.length?'請核對數量,按 ✓ 計入(紅字為信心較低):':'沒有辨識到商品。';
     renderAI();
   }catch(err){$('#photoMsg').textContent='辨識失敗:'+err.message}
@@ -546,6 +583,157 @@ $('#aiBulk').addEventListener('click',e=>{
   el.forEach(({x})=>commit(x,false)); // 沒有人逐項檢查,不當作學習證據,否則信任門檻會自我強化
   aiItems=aiItems.filter(x=>!el.some(o=>o.x===x));afterAI();toast(`已計入 ${el.length} 項`);
 });
+
+// ---------- 即時點貨:即時取景 → 拿穩自動定格 → 每件標一個點 → 點一下修正 ----------
+const COLORS=['#e11d48','#2563eb','#16a34a','#d97706','#9333ea','#0891b2','#db2777','#65a30d'];
+const TICK=150,STEADY_NEED=900,DIFF_MAX=6,CONTRAST_MIN=6,HIT=32;
+let lstream=null,ltimer=null,prevG=null,steadyMs=0,lbusy=false,liveOn=false;
+let live=null;                                   // 定格後:{items:[{code,name,confidence,note,base,orig,pts}],sel}
+const frame=document.createElement('canvas');    // 定格的畫面
+const gcv=document.createElement('canvas');gcv.width=32;gcv.height=24;
+function grayOf(src){
+  const g=gcv.getContext('2d',{willReadFrequently:true});g.drawImage(src,0,0,32,24);
+  const d=g.getImageData(0,0,32,24).data,o=new Uint8Array(768);
+  for(let i=0;i<768;i++)o[i]=(d[i*4]*3+d[i*4+1]*6+d[i*4+2])/10;
+  return o;
+}
+function frameDiff(a,b){let t=0;for(let i=0;i<a.length;i++)t+=Math.abs(a[i]-b[i]);return t/a.length}
+function contrast(a){let m=0;for(const v of a)m+=v;m/=a.length;let t=0;for(const v of a)t+=Math.abs(v-m);return t/a.length}
+// 回傳新的「已穩定毫秒數」:畫面幾乎沒動、而且不是全黑或被遮住,才累積
+function steadyStep(prev,cur,ms){return prev&&frameDiff(cur,prev)<DIFF_MAX&&contrast(cur)>=CONTRAST_MIN?ms+TICK:0}
+const depthOf=c=>c&&mem.sku[c]?.depth>1?mem.sku[c].depth:1;
+const unitsOf=it=>it.base+it.pts.length;
+const lmsg=t=>{$('#liveMsg').textContent=t};
+
+function liveCamOff(){clearInterval(ltimer);ltimer=null;lstream&&lstream.getTracks().forEach(t=>t.stop());lstream=null}
+function liveStop(){
+  liveCamOff();liveOn=false;live=null;lbusy=false;
+  ['liveWrap','shotBtn','liveStop','liveAct'].forEach(i=>$('#'+i).classList.add('hide'));
+  $('#liveBtn').classList.remove('hide');$('#liveLegend').innerHTML='';lmsg('');
+}
+async function liveResume(){ // 回到即時取景,等下一次定格
+  live=null;$('#liveLegend').innerHTML='';$('#liveAct').classList.add('hide');
+  $('#lc').classList.add('hide');$('#lv').classList.remove('hide');$('#shotBtn').classList.remove('hide');
+  try{
+    if(!lstream){
+      lstream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}});
+      const v=$('#lv');v.srcObject=lstream;await v.play();
+    }
+  }catch(e){liveStop();lmsg('無法開啟相機:'+e.message+'(需 HTTPS 並允許權限;不行的話請用下方「拍照辨識」)');return}
+  prevG=null;steadyMs=0;$('#steadyBar').style.width='0';
+  lmsg('對準一格貨架,拿穩不動就會自動定格。');
+  clearInterval(ltimer);ltimer=setInterval(liveTick,TICK);
+}
+$('#liveBtn').onclick=()=>{
+  if(!navigator.mediaDevices?.getUserMedia){lmsg('這個瀏覽器或連線方式不能使用即時鏡頭(需 HTTPS)。請用下方「拍照辨識」。');return}
+  stopScan();liveOn=true;
+  $('#liveWrap').classList.remove('hide');$('#liveStop').classList.remove('hide');$('#liveBtn').classList.add('hide');
+  liveResume();
+};
+$('#liveStop').onclick=liveStop;$('#liveRetry').onclick=liveResume;$('#shotBtn').onclick=()=>liveCapture();
+function liveTick(){
+  const v=$('#lv');if(live||lbusy||!v.videoWidth)return;
+  const g=grayOf(v);steadyMs=steadyStep(prevG,g,steadyMs);prevG=g;
+  $('#steadyBar').style.width=Math.min(100,100*steadyMs/STEADY_NEED)+'%';
+  if(steadyMs>=STEADY_NEED)liveCapture();
+}
+async function liveCapture(){
+  const v=$('#lv');if(lbusy||live||!v.videoWidth)return;
+  lbusy=true;clearInterval(ltimer);ltimer=null;
+  const k=Math.min(1,1600/Math.max(v.videoWidth,v.videoHeight));
+  frame.width=Math.round(v.videoWidth*k);frame.height=Math.round(v.videoHeight*k);
+  frame.getContext('2d').drawImage(v,0,0,frame.width,frame.height);
+  navigator.vibrate&&navigator.vibrate(40);
+  const lc=$('#lc');lc.width=frame.width;lc.height=frame.height;lc.getContext('2d').drawImage(frame,0,0);
+  $('#lv').classList.add('hide');lc.classList.remove('hide');$('#shotBtn').classList.add('hide');
+  let items=[];
+  if(!LS('sc_api'))lmsg('尚未設定辨識後端:請按「＋ 其他商品」選商品,再點畫面上的每一件。');
+  else{
+    lmsg('已定格,辨識中…(手機可以放下來了)');
+    try{
+      items=normItems(await apiCount(frame.toDataURL('image/jpeg',0.85).split(',')[1],true))
+        .map(x=>({code:x.code,name:x.name,confidence:x.confidence,note:x.note,fromAlias:x.fromAlias,pts:x.pts,base:x.pts.length?0:x.count,orig:x.orig}));
+      lmsg(items.length?'每個點代表一件。點圓點=刪除,點空白=補上(補到下方選取的商品)。':'沒有辨識到商品。可按「＋ 其他商品」後自己點。');
+    }catch(err){lmsg('辨識失敗:'+err.message+'。仍可按「＋ 其他商品」後自己點,或重拍。')}
+  }
+  if(!liveOn){lbusy=false;return}                 // 等待期間使用者已關閉
+  live={items,sel:items.length?0:-1};lbusy=false;
+  $('#liveAct').classList.remove('hide');liveDraw();
+}
+function liveDraw(){
+  const lc=$('#lc'),g=lc.getContext('2d');g.drawImage(frame,0,0);
+  const r=Math.max(9,lc.width*0.013);
+  live.items.forEach((it,i)=>{
+    g.fillStyle=COLORS[i%COLORS.length];g.strokeStyle='#fff';g.lineWidth=r*0.3;
+    it.pts.forEach(([x,y])=>{g.beginPath();g.arc(x/1000*lc.width,y/1000*lc.height,i===live.sel?r*1.2:r,0,6.2832);g.fill();g.stroke()});
+  });
+  let tot=0;
+  $('#liveLegend').innerHTML=live.items.map((it,i)=>{
+    const d=depthOf(it.code),n=unitsOf(it)*d;tot+=n;
+    return `<div class="item${i===live.sel?' sel':''}" data-li="${i}">
+      <div><span class="sw" style="background:${COLORS[i%COLORS.length]}"></span>${esc(it.code?nm(it.code):(it.name||'未知商品'))}${it.code?'':'<span class="badge">按此指定商品</span>'}
+        <div class="${it.confidence==='low'?'bad':'mut'}">${it.confidence==='manual'?'手動':'信心:'+esc(it.confidence)}${it.fromAlias?' · 依你之前的選擇':''}${it.base?` · 另有 ${it.base} 件 AI 未標位置 <button data-lb="${i}" data-d="-1" aria-label="減一">−</button><button data-lb="${i}" data-d="1" aria-label="加一">+</button>`:''}${it.note?' · '+esc(it.note):''}</div></div>
+      <div style="text-align:right;white-space:nowrap"><b style="font-size:22px">${n}</b> 件
+        <div class="mut">每點 ×<input type="number" inputmode="numeric" min="1" value="${d}" data-ld="${i}" ${it.code?'':'disabled'} aria-label="每點代表幾件(前後深度)" style="width:56px;min-height:36px;padding:4px;text-align:center"></div></div></div>`}).join('')
+    +`<div class="row" style="margin-top:8px"><button class="s" id="liveAdd">＋ 其他商品</button><span class="mut" style="margin-left:auto">這一格合計 ${tot} 件</span></div>
+      <p class="mut">後排被擋住?把「每點 ×」改成每一排的深度(例如前後 3 件就填 3),系統會記住這個商品的設定。</p>`;
+  $('#liveOk').disabled=!live.items.some(it=>unitsOf(it)>0);
+}
+function liveSelect(code){ // 選取(或新增)一個商品,之後點空白處就補到它身上
+  let i=live.items.findIndex(it=>it.code===code);
+  if(i<0){live.items.push({code,name:nm(code),confidence:'manual',note:'',pts:[],base:0,orig:0});i=live.items.length-1}
+  live.sel=i;liveDraw();
+}
+$('#lc').addEventListener('click',e=>{
+  if(!live)return;
+  const b=e.currentTarget.getBoundingClientRect();
+  const x=(e.clientX-b.left)/b.width*1000,y=(e.clientY-b.top)/b.height*1000,ar=b.height/b.width;
+  let best=null,bd=Infinity;
+  live.items.forEach((it,i)=>it.pts.forEach((p,j)=>{const d=Math.hypot(p[0]-x,(p[1]-y)*ar);if(d<bd){bd=d;best=[i,j]}}));
+  if(best&&bd<=HIT)live.items[best[0]].pts.splice(best[1],1);
+  else if(live.items[live.sel])live.items[live.sel].pts.push([clamp(x),clamp(y)]);
+  else return pick({title:'要點的是哪一個商品?',onPick:c=>{liveSelect(c);live.items[live.sel].pts.push([clamp(x),clamp(y)]);liveDraw()}});
+  liveDraw();
+});
+$('#liveLegend').addEventListener('click',e=>{
+  if(!live)return;
+  if(e.target.id==='liveAdd')return pick({title:'要點的是哪一個商品?',onPick:liveSelect});
+  const lb=e.target.closest('button[data-lb]');
+  if(lb){const it=live.items[+lb.dataset.lb];it.base=Math.max(0,it.base+ +lb.dataset.d);return liveDraw()}
+  if(e.target.matches('input'))return;
+  const row=e.target.closest('[data-li]');if(!row)return;
+  const i=+row.dataset.li,it=live.items[i];live.sel=i;
+  if(it.code)return liveDraw();
+  pick({title:`「${it.name||'未知商品'}」是哪一個商品?`,query:it.name||'',allowNew:true,newName:it.name||'未命名商品',onPick:c=>{
+    if(it.name)mem.alias[normName(it.name)]=c;
+    const ex=live.items.find(o=>o!==it&&o.code===c);
+    if(ex){ex.pts.push(...it.pts);ex.base+=it.base;ex.orig+=it.orig;live.items.splice(live.items.indexOf(it),1);live.sel=live.items.indexOf(ex)}
+    else it.code=c;
+    save();liveDraw();
+  }});
+});
+$('#liveLegend').addEventListener('change',e=>{
+  if(!live||!e.target.matches('input[data-ld]'))return;
+  const it=live.items[+e.target.dataset.ld];if(!it.code)return;
+  skuOf(it.code).depth=Math.min(999,Math.max(1,parseInt(e.target.value)||1));save();liveDraw();
+});
+$('#liveOk').onclick=()=>{
+  if(!live)return;
+  const un=live.items.filter(it=>!it.code&&unitsOf(it)>0);
+  if(un.length){lmsg(`還有 ${un.length} 種商品沒指定是哪一個,請點它的名稱指定後再計入。`);return}
+  const its=live.items.filter(it=>it.code);
+  snapshot(`即時點貨 ${its.length} 種`,true);
+  let tot=0;
+  its.forEach(it=>{
+    const u=unitsOf(it);
+    if(!u){if(it.orig>0)skuOf(it.code).fp++;return}       // AI 說有、你全部刪掉 → 記為誤報,不計入
+    if(it.confidence!=='manual')learn({code:it.code,count:u,orig:it.orig,confidence:it.confidence}); // 學習以「可見件數」為準,不含深度
+    const n=u*depthOf(it.code);add(it.code,n,null,true);tot+=n;
+  });
+  if(batch.length)analyzeBatch();
+  save();renderMem();toast(`已計入 ${tot} 件,請移到下一格`);
+  liveResume();
+};
 
 // 若網頁由 NAS 伺服器提供,自動使用同一台的辨識 API(其他情況會得到 404,直接略過)
 if(!LS('sc_api')&&location.protocol.startsWith('http')){
