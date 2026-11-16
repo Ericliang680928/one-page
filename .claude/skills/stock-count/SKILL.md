@@ -135,6 +135,14 @@ description: 倉庫盤點專案(stock-count/)的開發與維運知識。凡是�
 - **已知小問題**:圓點顏色只有 8 種,超過 8 個品項會重複。
 - **下一階段**:手機端執行不分品項的商品偵測模型,取景時就即時框出並計數(設計文件第 7 節)。
 
+## Supabase 部署紀錄
+
+- 2026-11-16 依使用者選擇,`count-photo` 已部署到專案 `imc-miaoli-bot`(ref `ahrgjhlfbrsfznvbokkf`),`verify_jwt` 開啟。網址:`https://ahrgjhlfbrsfznvbokkf.supabase.co/functions/v1/count-photo`。
+- 部署時把 `_shared/count.ts` 放在函式資料夾同一層(`./count.ts`),邏輯與 repo 相同。**改了 `_shared/count.ts` 之後要重新部署才會生效。**
+- Secrets(`ANTHROPIC_API_KEY`、`APP_PASSCODE`)由使用者在後台填寫,不經過對話。
+- 這個專案原本是社務機器人用的;盤點函式不讀寫資料庫。購物網專案 `milletshome-core` 不要放盤點相關的東西。
+- 開發環境的網路連不到 Supabase 的函式網址,部署後無法從這裡實測,要由使用者用手機驗證。
+
 ## NAS 部署(Synology DS218+)
 
 ### 決策
