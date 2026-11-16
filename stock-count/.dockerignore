@@ -1,0 +1,9 @@
+# 建置內容只需要 nas/server.ts、supabase/functions/_shared/count.ts、index.html、sw.js。
+# 其餘一律排除,尤其是真實照片、評測資料與密碼檔。
+eval/
+nas/.env
+nas/.env.*
+!nas/.env.example
+.git
+**/node_modules
+*.md

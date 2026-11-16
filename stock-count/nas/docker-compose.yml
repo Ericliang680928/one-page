@@ -1,0 +1,33 @@
+# 用法(在本資料夾 stock-count/ 的上一層為建置內容):
+#   cp nas/.env.example nas/.env   # 然後編輯 nas/.env 填入金鑰與密碼
+#   docker compose -f nas/docker-compose.yml up -d --build
+services:
+  stock-count:
+    build:
+      context: ..
+      dockerfile: nas/Dockerfile
+    container_name: stock-count
+    restart: unless-stopped
+    env_file: .env
+    # 只綁在 NAS 本機。由 Synology 的反向代理(HTTPS)轉進來;要在內網直接測試時,
+    # 可暫時改成 "8787:8787"。
+    ports:
+      - "127.0.0.1:8787:8787"
+    environment:
+      TRUST_PROXY: "1"   # 前面有反向代理時,用 X-Forwarded-For 判斷來源
+    mem_limit: 256m      # DS218+ 只有 2GB 記憶體,限制這個容器的上限
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "deno", "eval", "const r=await fetch('http://127.0.0.1:8787/api/healthz');Deno.exit(r.ok?0:1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
